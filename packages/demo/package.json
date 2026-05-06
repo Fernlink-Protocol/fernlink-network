@@ -1,6 +1,6 @@
 {
   "name": "fernlink-demo",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "End-to-end Fernlink mesh verification demo against Solana devnet",
   "bin": {
     "fernlink-demo": "dist/demo.js"
