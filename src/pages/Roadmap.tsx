@@ -119,9 +119,9 @@ export default function Roadmap() {
           Roadmap
         </h1>
         <p className="font-mono text-[#166534] text-lg max-w-2xl leading-relaxed">
-          Seven phases shipped. The verification mesh is live across Android, iOS,
-          TypeScript, and Rust desktop. Phase 8 extends the protocol from proofs to full
-          bidirectional mesh capabilities.
+          Eight phases shipped. The verification mesh is live across Android, iOS,
+          TypeScript, and Rust desktop. Phase 9 extends the protocol from read-only proofs
+          to full bidirectional mesh capabilities.
         </p>
       </section>
 

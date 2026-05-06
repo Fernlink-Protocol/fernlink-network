@@ -3,11 +3,11 @@ import { Link } from "react-router-dom";
 import { GITHUB } from "@/lib/constants";
 
 const sdks = [
-  { platform: "TypeScript / Node.js", version: "v0.2.0", pkg: "fernlink-sdk",     install: "npm install fernlink-sdk",           repo: `${GITHUB}/tree/main/packages/sdk`,            status: "Available" },
+  { platform: "TypeScript / Node.js", version: "v0.2.1", pkg: "fernlink-sdk",     install: "npm install fernlink-sdk",           repo: `${GITHUB}/tree/main/packages/sdk`,            status: "Available" },
   { platform: "Rust Core",            version: "v0.1.0", pkg: "fernlink-core",    install: "cargo add fernlink-core",             repo: `${GITHUB}/tree/main/packages/fernlink-core`,  status: "Available" },
   { platform: "Android (Kotlin)",     version: null,     pkg: "fernlink-android", install: null,                                  repo: `${GITHUB}/tree/main/packages/android`,        status: "Available" },
   { platform: "iOS (Swift)",          version: null,     pkg: "fernlink-ios",     install: null,                                  repo: `${GITHUB}/tree/main/packages/ios`,            status: "Available" },
-  { platform: "Web (Browser)",        version: "v0.2.0", pkg: "fernlink-sdk",     install: "npm install fernlink-sdk",           repo: `${GITHUB}/tree/main/packages/sdk`,            status: "Available" },
+  { platform: "Web (Browser)",        version: "v0.2.1", pkg: "fernlink-sdk",     install: "npm install fernlink-sdk",           repo: `${GITHUB}/tree/main/packages/sdk`,            status: "Available" },
   { platform: "Desktop (Rust)",       version: null,     pkg: "fernlink-node",    install: "cargo install fernlink-ble-desktop",  repo: `${GITHUB}/tree/main/packages/ble-desktop`,   status: "Available" },
   { platform: "React Native",         version: null,     pkg: "fernlink-rn",      install: null,                                  repo: null,                                          status: "Planned" },
 ];
