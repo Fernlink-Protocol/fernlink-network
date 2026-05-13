@@ -40,4 +40,5 @@ struct VerificationRequest: Codable {
     let txSignature: String
     let commitment:  String
     let ttl:         Int
+    let requestId:   String?
 }

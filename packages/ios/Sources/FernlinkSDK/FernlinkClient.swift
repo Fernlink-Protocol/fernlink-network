@@ -1,23 +1,5 @@
 import Foundation
 
-/// Public entry point for the Fernlink iOS SDK.
-///
-/// Usage:
-/// ```swift
-/// let client = FernlinkClient(config: FernlinkClientConfig())
-/// client.start()
-///
-/// // Add BLE mesh transport once Bluetooth permission is granted:
-/// client.startMesh()
-///
-/// // Optionally add Multipeer Connectivity for Apple-to-Apple high-bandwidth mesh:
-/// client.attachMultipeerTransport()
-///
-/// let result = try await client.verifyTransaction("5VERv8...")
-/// ```
-///
-/// Multiple transports can be active simultaneously. The highest-priority
-/// transport with connected peers is used for each verification request.
 public final class FernlinkClient {
 
     public let publicKey: String
@@ -27,7 +9,6 @@ public final class FernlinkClient {
     private let config:    FernlinkClientConfig
     private var started    = false
 
-    // Each transport gets its own router; both share the same ProofStore.
     private var transports: [(transport: FernlinkTransport, router: TransportMessageRouter)] = []
     private let proofStore = ProofStore()
 
@@ -48,20 +29,16 @@ public final class FernlinkClient {
 
     // MARK: - Transport management
 
-    /// Boot the BLE mesh layer. Convenience wrapper over attachTransport.
     public func startMesh() {
         let ble = BleTransport(proofStore: proofStore)
         attachTransport(ble)
     }
 
-    /// Boot Multipeer Connectivity for Apple-to-Apple high-bandwidth mesh.
-    /// Call after startMesh() if you also want BLE, or alone for Apple-only.
     public func attachMultipeerTransport() {
         let mpc = MultipeerTransport(localPubKey: publicKey)
         attachTransport(mpc)
     }
 
-    /// Attach any FernlinkTransport implementation to the mesh.
     public func attachTransport(_ transport: FernlinkTransport) {
         let router = TransportMessageRouter(
             transport:   transport,
@@ -72,6 +49,7 @@ public final class FernlinkClient {
         transport.start()
         router.start()
         transports.append((transport: transport, router: router))
+        rewireCrossTransportForwarding()
     }
 
     public func stopMesh() {
@@ -79,7 +57,6 @@ public final class FernlinkClient {
         transports.removeAll()
     }
 
-    /// Total connected peers across all active transports.
     public var connectedPeerCount: Int {
         transports.reduce(0) { $0 + $1.transport.connectedPeerCount }
     }
@@ -87,24 +64,14 @@ public final class FernlinkClient {
     // MARK: - NFC bootstrapping
 
 #if canImport(CoreNFC)
-    /// Create an NFC reader that parses an Android HCE bootstrap tap.
-    /// On receipt, calls CentralManager.connectDirect() on the BLE transport
-    /// so BLE pairing skips the scan phase (~5s → ~200ms).
     @available(iOS 13.0, *)
     public func createNfcBootstrapReader(
         onBootstrapReceived: ((String, String?) -> Void)? = nil
     ) -> NfcBootstrapReader {
         return NfcBootstrapReader { [weak self] peerPubKey, bleAddress in
-            // Find the BLE transport and attempt a direct connect
             if let bleTransport = self?.transports.first(where: {
                 $0.transport is BleTransport
             })?.transport as? BleTransport {
-                // connectDirect via the central manager if we have a MAC address
-                // CBCentralManager.retrievePeripherals(withIdentifiers:) doesn't accept
-                // MAC addresses directly on iOS (CoreBluetooth uses UUIDs). We trigger
-                // a targeted scan for the Fernlink service — MCF handles Apple-to-Apple.
-                // For Android↔iOS, the BLE scan finds the device quickly after NFC
-                // narrows the user's proximity context.
                 bleTransport.startDirectScan()
             }
             onBootstrapReceived?(peerPubKey, bleAddress)
@@ -114,10 +81,6 @@ public final class FernlinkClient {
 
     // MARK: - Verification
 
-    /// Verify a Solana transaction through the mesh.
-    ///
-    /// Uses the highest-priority transport with active peers. Falls back to
-    /// direct RPC if no transport responds within timeoutMs.
     public func verifyTransaction(
         _ txSignature: String,
         commitment:    Commitment = .confirmed,
@@ -125,22 +88,22 @@ public final class FernlinkClient {
     ) async throws -> ConsensusResult {
         guard started else { throw FernlinkError.notStarted }
 
-        // Pick highest-priority transport with connected peers
-        let active = transports
-            .filter { $0.transport.connectedPeerCount > 0 }
-            .max(by: { $0.transport.transportType.priority < $1.transport.transportType.priority })
+        let active = transports.filter { $0.transport.connectedPeerCount > 0 }
 
-        if let active {
-            active.router.clearProofs()
-            active.router.broadcastRequest(
-                txSignature: txSignature,
-                commitment:  commitment.rawValue,
-                ttl:         8
-            )
+        if !active.isEmpty {
+            // Clear all routers before a new round — prevents stale proofs from any transport.
+            transports.forEach { $0.router.clearProofs() }
+            // Broadcast to every transport that has peers simultaneously.
+            active.forEach {
+                $0.router.broadcastRequest(
+                    txSignature: txSignature,
+                    commitment:  commitment.rawValue,
+                    ttl:         8
+                )
+            }
             try await Task.sleep(nanoseconds: UInt64(timeoutMs) * 1_000_000)
 
-            let proofs = active.router.collectedProofsList()
-            if let result = consensus(proofs: proofs, minProofs: config.minProofs) {
+            if let result = evaluateCombinedProofs(minProofs: config.minProofs) {
                 return result
             }
         }
@@ -158,30 +121,44 @@ public final class FernlinkClient {
                                slot: proof.slot, blockTime: proof.blockTime, proofCount: 1)
     }
 
-    // MARK: - Consensus
+    // MARK: - Private
 
-    private func consensus(proofs: [VerificationProof], minProofs: Int) -> ConsensusResult? {
-        if proofs.isEmpty { return nil }
+    private func rewireCrossTransportForwarding() {
+        for i in transports.indices {
+            let others = transports.indices.filter { $0 != i }.map { transports[$0].router }
+            transports[i].router.setExternalForwarders(
+                requestSender: { data in others.forEach { $0.injectRequest(data) } },
+                proofSender:   { data in others.forEach { $0.injectProof(data) } }
+            )
+        }
+    }
 
-        // One vote per distinct signer — prevents a single device reaching threshold alone.
+    private func evaluateCombinedProofs(minProofs: Int) -> ConsensusResult? {
         var seenSigners = Set<Data>()
-        let unique = proofs.filter { seenSigners.insert($0.verifierPublicKey).inserted }
+        let allProofs = transports
+            .flatMap { $0.router.collectedProofsList() }
+            .filter { seenSigners.insert($0.verifierPublicKey).inserted }
+
+        guard !allProofs.isEmpty else { return nil }
 
         var tally: [(key: (TxStatus, UInt64), count: Int, blockTime: UInt64)] = []
-        for proof in unique {
-            let key = (proof.status, proof.slot)
-            if let i = tally.firstIndex(where: { $0.key == key }) {
+        for proof in allProofs {
+            let k = (proof.status, proof.slot)
+            if let i = tally.firstIndex(where: { $0.key == k }) {
                 tally[i].count += 1
             } else {
-                tally.append((key: key, count: 1, blockTime: proof.blockTime))
+                tally.append((key: k, count: 1, blockTime: proof.blockTime))
             }
         }
-        guard let best = tally.max(by: { $0.count < $1.count }),
-              best.count >= minProofs
-        else { return nil }
+        guard let best = tally.max(by: { $0.count < $1.count }) else { return nil }
 
-        return ConsensusResult(settled: true, status: best.key.0,
-                               slot: best.key.1, blockTime: best.blockTime, proofCount: best.count)
+        return ConsensusResult(
+            settled:    best.count >= minProofs,
+            status:     best.key.0,
+            slot:       best.key.1,
+            blockTime:  best.blockTime,
+            proofCount: best.count
+        )
     }
 }
 

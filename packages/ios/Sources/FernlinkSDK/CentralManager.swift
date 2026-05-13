@@ -61,7 +61,8 @@ final class FernlinkCentralManager: NSObject {
             guard let data = try? JSONEncoder().encode(VerificationRequest(
                 txSignature: req.txSignature,
                 commitment:  req.commitment,
-                ttl:         req.ttl
+                ttl:         req.ttl,
+                requestId:   nil
             )) else { continue }
             BleFragmentation.fragment(encodeWirePayload(data)).forEach {
                 peripheral.writeValue($0, for: requestChar, type: .withoutResponse)

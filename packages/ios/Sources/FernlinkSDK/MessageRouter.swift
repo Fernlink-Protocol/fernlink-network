@@ -97,7 +97,7 @@ final class MessageRouter {
     }
 
     private func sendRequest(txSignature: String, commitment: String, ttl: Int) {
-        let req = VerificationRequest(txSignature: txSignature, commitment: commitment, ttl: ttl)
+        let req = VerificationRequest(txSignature: txSignature, commitment: commitment, ttl: ttl, requestId: nil)
         guard let data = try? JSONEncoder().encode(req) else { return }
         central.sendRequest(data)
     }
