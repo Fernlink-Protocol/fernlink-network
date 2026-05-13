@@ -79,7 +79,9 @@ final class TransportMessageRouter {
               verifyProof(proof)
         else { return }
         let added: Bool = routerLock.withLock {
-            guard !_currentTxSig.isEmpty, proof.txSignature == _currentTxSig else { return false }
+            // proof.txSignature holds at most 64 chars (wire format truncates to 64 bytes).
+            let txKey = String(_currentTxSig.prefix(64))
+            guard !txKey.isEmpty, proof.txSignature == txKey else { return false }
             guard _seenVerifierKeys.insert(proof.verifierPublicKey).inserted else { return false }
             _collectedProofs.append(proof)
             return true
@@ -130,7 +132,8 @@ final class TransportMessageRouter {
               verifyProof(proof)
         else { return }
         let added: Bool = routerLock.withLock {
-            guard !_currentTxSig.isEmpty, proof.txSignature == _currentTxSig else { return false }
+            let txKey = String(_currentTxSig.prefix(64))
+            guard !txKey.isEmpty, proof.txSignature == txKey else { return false }
             guard _seenVerifierKeys.insert(proof.verifierPublicKey).inserted else { return false }
             _collectedProofs.append(proof)
             return true

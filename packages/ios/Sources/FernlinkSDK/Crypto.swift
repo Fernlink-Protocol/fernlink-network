@@ -73,7 +73,12 @@ private func buildSignableBytes(
     pubKey:      Data
 ) -> Data {
     var d = Data()
-    d.append(contentsOf: txSignature.utf8)
+    // Mirror the Rust FFI: store the first 64 UTF-8 bytes of txSignature, zero-padded.
+    // This ensures proof signatures are cross-platform compatible with Android/Rust.
+    var txPadded = [UInt8](repeating: 0, count: 64)
+    let raw = Array(txSignature.utf8)
+    txPadded.replaceSubrange(0..<min(raw.count, 64), with: raw[0..<min(raw.count, 64)])
+    d.append(contentsOf: txPadded)
     d.append(status)
     d.append(littleEndian: slot)
     d.append(littleEndian: blockTime)
