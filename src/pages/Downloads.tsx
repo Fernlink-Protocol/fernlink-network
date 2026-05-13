@@ -124,8 +124,9 @@ console.log(result.status, result.slot, result.proofCount);
             <span className="material-symbols-outlined text-[#22C55E] text-4xl mb-4 block data-glow">code</span>
             <h2 className="font-mono font-semibold text-xl text-[#22C55E] mb-3">Source Code</h2>
             <p className="font-mono text-sm text-[#166534] mb-6 leading-relaxed">
-              Full monorepo: Rust core, TypeScript SDK, Android and iOS SDKs, BLE and WiFi/TCP
-              transports, NFC bootstrapping, LZ4/zstd wire compression, and a live devnet demo.
+              Full monorepo: Rust core, TypeScript SDK, Android and iOS SDKs, BLE, WiFi Direct P2P
+              (Android), and WiFi/TCP (TypeScript/Rust) transports, NFC bootstrapping, cross-transport
+              mesh bridge, LZ4/zstd wire compression, and a live devnet demo.
               Apache 2.0 licensed and open for contributions.
             </p>
             <a

@@ -13,7 +13,7 @@ const features = [
     icon: "hub",
     title: "Peer-to-Peer Mesh",
     desc: "Devices connect directly via Bluetooth LE and WiFi/TCP, creating a resilient web of local verification that operates independently of centralized infrastructure.",
-    stat: "ACTIVE_TRANSPORTS: 03",
+    stat: "ACTIVE_TRANSPORTS: 04",
   },
   {
     icon: "enhanced_encryption",
@@ -24,8 +24,8 @@ const features = [
   {
     icon: "dynamic_feed",
     title: "Multi-Transport",
-    desc: "BLE for low-power mesh networking, WiFi/TCP with mDNS auto-discovery for high-throughput LAN verification, and NFC for sub-200ms peer bootstrapping.",
-    stat: "BLE + WIFI_TCP + NFC",
+    desc: "BLE for low-power mesh networking, WiFi Direct P2P for high-throughput Android-to-Android verification without a router, WiFi/TCP with mDNS for LAN nodes, and NFC for sub-200ms peer bootstrapping.",
+    stat: "BLE + WIFI_DIRECT + NFC",
   },
   {
     icon: "shield_lock",
