@@ -3,15 +3,33 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		FC1D2E3F4A5B6C7D8E9F0A1B /* FernlinkDemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB7C8D9E0F1A2B3C4D5E6F7A /* FernlinkDemoApp.swift */; };
 		FC2D3E4F5A6B7C8D9E0F1A2B /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB8C9D0E1F2A3B4C5D6E7F8A /* ContentView.swift */; };
 		FC3D4E5F6A7B8C9E0F1A2B3C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FB9C0D1E2F3A4B5C6D7E8F9A /* Assets.xcassets */; };
-		FC6D7E8F9A0B1C2D3E4F5A6B /* FernlinkSDK in Frameworks */ = {isa = PBXBuildFile; productRef = FC5D6E7F8A9B0C1D2E3F4A5B /* FernlinkSDK */; };
 		FD1A2B3C4D5E6F7A8B9C0D1E /* DemoViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD0A2B3C4D5E6F7A8B9C0D1E /* DemoViewModel.swift */; };
+		GE01B2C3D4E5F6A7B8C9D0E1 /* BleUuids.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE01B2C3D4E5F6A7B8C9D0E1 /* BleUuids.swift */; };
+		GE02B2C3D4E5F6A7B8C9D0E1 /* CentralManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE02B2C3D4E5F6A7B8C9D0E1 /* CentralManager.swift */; };
+		GE03B2C3D4E5F6A7B8C9D0E1 /* Compression.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE03B2C3D4E5F6A7B8C9D0E1 /* Compression.swift */; };
+		GE04B2C3D4E5F6A7B8C9D0E1 /* Crypto.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE04B2C3D4E5F6A7B8C9D0E1 /* Crypto.swift */; };
+		GE05B2C3D4E5F6A7B8C9D0E1 /* FernlinkClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE05B2C3D4E5F6A7B8C9D0E1 /* FernlinkClient.swift */; };
+		GE06B2C3D4E5F6A7B8C9D0E1 /* Fragmentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE06B2C3D4E5F6A7B8C9D0E1 /* Fragmentation.swift */; };
+		GE07B2C3D4E5F6A7B8C9D0E1 /* MessageRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE07B2C3D4E5F6A7B8C9D0E1 /* MessageRouter.swift */; };
+		GE08B2C3D4E5F6A7B8C9D0E1 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE08B2C3D4E5F6A7B8C9D0E1 /* Models.swift */; };
+		GE09B2C3D4E5F6A7B8C9D0E1 /* NfcBootstrapReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE09B2C3D4E5F6A7B8C9D0E1 /* NfcBootstrapReader.swift */; };
+		GE10B2C3D4E5F6A7B8C9D0E1 /* PeripheralManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE10B2C3D4E5F6A7B8C9D0E1 /* PeripheralManager.swift */; };
+		GE11B2C3D4E5F6A7B8C9D0E1 /* ProofStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE11B2C3D4E5F6A7B8C9D0E1 /* ProofStore.swift */; };
+		GE12B2C3D4E5F6A7B8C9D0E1 /* SolanaRpc.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE12B2C3D4E5F6A7B8C9D0E1 /* SolanaRpc.swift */; };
+		GE13B2C3D4E5F6A7B8C9D0E1 /* BleTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE13B2C3D4E5F6A7B8C9D0E1 /* BleTransport.swift */; };
+		GE14B2C3D4E5F6A7B8C9D0E1 /* FernlinkTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE14B2C3D4E5F6A7B8C9D0E1 /* FernlinkTransport.swift */; };
+		GE15B2C3D4E5F6A7B8C9D0E1 /* MultipeerTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE15B2C3D4E5F6A7B8C9D0E1 /* MultipeerTransport.swift */; };
+		GE16B2C3D4E5F6A7B8C9D0E1 /* TransportManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE16B2C3D4E5F6A7B8C9D0E1 /* TransportManager.swift */; };
+		GE17B2C3D4E5F6A7B8C9D0E1 /* TransportMessageRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE17B2C3D4E5F6A7B8C9D0E1 /* TransportMessageRouter.swift */; };
+		IE01B2C3D4E5F6A7B8C9D0E1 /* CoreBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = HE01B2C3D4E5F6A7B8C9D0E1 /* CoreBluetooth.framework */; };
+		IE02B2C3D4E5F6A7B8C9D0E1 /* MultipeerConnectivity.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = HE02B2C3D4E5F6A7B8C9D0E1 /* MultipeerConnectivity.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -21,6 +39,25 @@
 		FB9C0D1E2F3A4B5C6D7E8F9A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		FC0D1E2F3A4B5C6D7E8F9A0B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FD0A2B3C4D5E6F7A8B9C0D1E /* DemoViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoViewModel.swift; sourceTree = "<group>"; };
+		FE01B2C3D4E5F6A7B8C9D0E1 /* BleUuids.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BleUuids.swift; path = "../ios/Sources/FernlinkSDK/BleUuids.swift"; sourceTree = "<group>"; };
+		FE02B2C3D4E5F6A7B8C9D0E1 /* CentralManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CentralManager.swift; path = "../ios/Sources/FernlinkSDK/CentralManager.swift"; sourceTree = "<group>"; };
+		FE03B2C3D4E5F6A7B8C9D0E1 /* Compression.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Compression.swift; path = "../ios/Sources/FernlinkSDK/Compression.swift"; sourceTree = "<group>"; };
+		FE04B2C3D4E5F6A7B8C9D0E1 /* Crypto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Crypto.swift; path = "../ios/Sources/FernlinkSDK/Crypto.swift"; sourceTree = "<group>"; };
+		FE05B2C3D4E5F6A7B8C9D0E1 /* FernlinkClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FernlinkClient.swift; path = "../ios/Sources/FernlinkSDK/FernlinkClient.swift"; sourceTree = "<group>"; };
+		FE06B2C3D4E5F6A7B8C9D0E1 /* Fragmentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Fragmentation.swift; path = "../ios/Sources/FernlinkSDK/Fragmentation.swift"; sourceTree = "<group>"; };
+		FE07B2C3D4E5F6A7B8C9D0E1 /* MessageRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MessageRouter.swift; path = "../ios/Sources/FernlinkSDK/MessageRouter.swift"; sourceTree = "<group>"; };
+		FE08B2C3D4E5F6A7B8C9D0E1 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Models.swift; path = "../ios/Sources/FernlinkSDK/Models.swift"; sourceTree = "<group>"; };
+		FE09B2C3D4E5F6A7B8C9D0E1 /* NfcBootstrapReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NfcBootstrapReader.swift; path = "../ios/Sources/FernlinkSDK/nfc/NfcBootstrapReader.swift"; sourceTree = "<group>"; };
+		FE10B2C3D4E5F6A7B8C9D0E1 /* PeripheralManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PeripheralManager.swift; path = "../ios/Sources/FernlinkSDK/PeripheralManager.swift"; sourceTree = "<group>"; };
+		FE11B2C3D4E5F6A7B8C9D0E1 /* ProofStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ProofStore.swift; path = "../ios/Sources/FernlinkSDK/ProofStore.swift"; sourceTree = "<group>"; };
+		FE12B2C3D4E5F6A7B8C9D0E1 /* SolanaRpc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SolanaRpc.swift; path = "../ios/Sources/FernlinkSDK/SolanaRpc.swift"; sourceTree = "<group>"; };
+		FE13B2C3D4E5F6A7B8C9D0E1 /* BleTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BleTransport.swift; path = "../ios/Sources/FernlinkSDK/transport/BleTransport.swift"; sourceTree = "<group>"; };
+		FE14B2C3D4E5F6A7B8C9D0E1 /* FernlinkTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FernlinkTransport.swift; path = "../ios/Sources/FernlinkSDK/transport/FernlinkTransport.swift"; sourceTree = "<group>"; };
+		FE15B2C3D4E5F6A7B8C9D0E1 /* MultipeerTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MultipeerTransport.swift; path = "../ios/Sources/FernlinkSDK/transport/MultipeerTransport.swift"; sourceTree = "<group>"; };
+		FE16B2C3D4E5F6A7B8C9D0E1 /* TransportManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TransportManager.swift; path = "../ios/Sources/FernlinkSDK/transport/TransportManager.swift"; sourceTree = "<group>"; };
+		FE17B2C3D4E5F6A7B8C9D0E1 /* TransportMessageRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TransportMessageRouter.swift; path = "../ios/Sources/FernlinkSDK/transport/TransportMessageRouter.swift"; sourceTree = "<group>"; };
+		HE01B2C3D4E5F6A7B8C9D0E1 /* CoreBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreBluetooth.framework; path = System/Library/Frameworks/CoreBluetooth.framework; sourceTree = SDKROOT; };
+		HE02B2C3D4E5F6A7B8C9D0E1 /* MultipeerConnectivity.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MultipeerConnectivity.framework; path = System/Library/Frameworks/MultipeerConnectivity.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -28,7 +65,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FC6D7E8F9A0B1C2D3E4F5A6B /* FernlinkSDK in Frameworks */,
+				IE01B2C3D4E5F6A7B8C9D0E1 /* CoreBluetooth.framework in Frameworks */,
+				IE02B2C3D4E5F6A7B8C9D0E1 /* MultipeerConnectivity.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -39,6 +77,8 @@
 			isa = PBXGroup;
 			children = (
 				FB5C6D7E8F9A0B1C2D3E4F5A /* FernlinkDemo */,
+				JE01B2C3D4E5F6A7B8C9D0E1 /* FernlinkSDK */,
+				JE04B2C3D4E5F6A7B8C9D0E1 /* Frameworks */,
 				FB3C4D5E6F7A8B9C0D1E2F3A /* Products */,
 			);
 			sourceTree = "<group>";
@@ -63,6 +103,55 @@
 			path = FernlinkDemo;
 			sourceTree = "<group>";
 		};
+		JE01B2C3D4E5F6A7B8C9D0E1 /* FernlinkSDK */ = {
+			isa = PBXGroup;
+			children = (
+				FE01B2C3D4E5F6A7B8C9D0E1 /* BleUuids.swift */,
+				FE02B2C3D4E5F6A7B8C9D0E1 /* CentralManager.swift */,
+				FE03B2C3D4E5F6A7B8C9D0E1 /* Compression.swift */,
+				FE04B2C3D4E5F6A7B8C9D0E1 /* Crypto.swift */,
+				FE05B2C3D4E5F6A7B8C9D0E1 /* FernlinkClient.swift */,
+				FE06B2C3D4E5F6A7B8C9D0E1 /* Fragmentation.swift */,
+				FE07B2C3D4E5F6A7B8C9D0E1 /* MessageRouter.swift */,
+				FE08B2C3D4E5F6A7B8C9D0E1 /* Models.swift */,
+				FE10B2C3D4E5F6A7B8C9D0E1 /* PeripheralManager.swift */,
+				FE11B2C3D4E5F6A7B8C9D0E1 /* ProofStore.swift */,
+				FE12B2C3D4E5F6A7B8C9D0E1 /* SolanaRpc.swift */,
+				JE02B2C3D4E5F6A7B8C9D0E1 /* transport */,
+				JE03B2C3D4E5F6A7B8C9D0E1 /* nfc */,
+			);
+			name = FernlinkSDK;
+			sourceTree = "<group>";
+		};
+		JE02B2C3D4E5F6A7B8C9D0E1 /* transport */ = {
+			isa = PBXGroup;
+			children = (
+				FE13B2C3D4E5F6A7B8C9D0E1 /* BleTransport.swift */,
+				FE14B2C3D4E5F6A7B8C9D0E1 /* FernlinkTransport.swift */,
+				FE15B2C3D4E5F6A7B8C9D0E1 /* MultipeerTransport.swift */,
+				FE16B2C3D4E5F6A7B8C9D0E1 /* TransportManager.swift */,
+				FE17B2C3D4E5F6A7B8C9D0E1 /* TransportMessageRouter.swift */,
+			);
+			name = transport;
+			sourceTree = "<group>";
+		};
+		JE03B2C3D4E5F6A7B8C9D0E1 /* nfc */ = {
+			isa = PBXGroup;
+			children = (
+				FE09B2C3D4E5F6A7B8C9D0E1 /* NfcBootstrapReader.swift */,
+			);
+			name = nfc;
+			sourceTree = "<group>";
+		};
+		JE04B2C3D4E5F6A7B8C9D0E1 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				HE01B2C3D4E5F6A7B8C9D0E1 /* CoreBluetooth.framework */,
+				HE02B2C3D4E5F6A7B8C9D0E1 /* MultipeerConnectivity.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -79,9 +168,6 @@
 			dependencies = (
 			);
 			name = FernlinkDemo;
-			packageProductDependencies = (
-				FC5D6E7F8A9B0C1D2E3F4A5B /* FernlinkSDK */,
-			);
 			productName = FernlinkDemo;
 			productReference = FB4C5D6E7F8A9B0C1D2E3F4A /* FernlinkDemo.app */;
 			productType = "com.apple.product-type.application";
@@ -93,16 +179,16 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1500;
-				LastUpgradeCheck = 1500;
+				LastSwiftUpdateCheck = 1510;
+				LastUpgradeCheck = 1510;
 				TargetAttributes = {
 					FA3B4C5D6E7F8A9B0C1D2E3F = {
-						CreatedOnToolsVersion = 15.0;
+						CreatedOnToolsVersion = 15.1;
 					};
 				};
 			};
 			buildConfigurationList = FA4B5C6D7E8F9A0B1C2D3E4F /* Build configuration list for PBXProject "FernlinkDemo" */;
-			compatibilityVersion = "Xcode 14.0";
+			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -110,9 +196,6 @@
 				Base,
 			);
 			mainGroup = FA2B3C4D5E6F7A8B9C0D1E2F;
-			packageReferences = (
-				FC4D5E6F7A8B9C0D1E2F3A4B /* XCLocalSwiftPackageReference "../ios" */,
-			);
 			productRefGroup = FB3C4D5E6F7A8B9C0D1E2F3A /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -127,7 +210,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FC3D4E5F6A7B8C9E0F1A2B3C /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -141,6 +223,23 @@
 				FC1D2E3F4A5B6C7D8E9F0A1B /* FernlinkDemoApp.swift in Sources */,
 				FC2D3E4F5A6B7C8D9E0F1A2B /* ContentView.swift in Sources */,
 				FD1A2B3C4D5E6F7A8B9C0D1E /* DemoViewModel.swift in Sources */,
+				GE01B2C3D4E5F6A7B8C9D0E1 /* BleUuids.swift in Sources */,
+				GE02B2C3D4E5F6A7B8C9D0E1 /* CentralManager.swift in Sources */,
+				GE03B2C3D4E5F6A7B8C9D0E1 /* Compression.swift in Sources */,
+				GE04B2C3D4E5F6A7B8C9D0E1 /* Crypto.swift in Sources */,
+				GE05B2C3D4E5F6A7B8C9D0E1 /* FernlinkClient.swift in Sources */,
+				GE06B2C3D4E5F6A7B8C9D0E1 /* Fragmentation.swift in Sources */,
+				GE07B2C3D4E5F6A7B8C9D0E1 /* MessageRouter.swift in Sources */,
+				GE08B2C3D4E5F6A7B8C9D0E1 /* Models.swift in Sources */,
+				GE09B2C3D4E5F6A7B8C9D0E1 /* NfcBootstrapReader.swift in Sources */,
+				GE10B2C3D4E5F6A7B8C9D0E1 /* PeripheralManager.swift in Sources */,
+				GE11B2C3D4E5F6A7B8C9D0E1 /* ProofStore.swift in Sources */,
+				GE12B2C3D4E5F6A7B8C9D0E1 /* SolanaRpc.swift in Sources */,
+				GE13B2C3D4E5F6A7B8C9D0E1 /* BleTransport.swift in Sources */,
+				GE14B2C3D4E5F6A7B8C9D0E1 /* FernlinkTransport.swift in Sources */,
+				GE15B2C3D4E5F6A7B8C9D0E1 /* MultipeerTransport.swift in Sources */,
+				GE16B2C3D4E5F6A7B8C9D0E1 /* TransportManager.swift in Sources */,
+				GE17B2C3D4E5F6A7B8C9D0E1 /* TransportMessageRouter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -156,26 +255,6 @@
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
-				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_INFINITE_RECURSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_CYCLES = YES;
-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_SUSPICIOUS_MOVE = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -188,17 +267,14 @@
 					"DEBUG=1",
 					"$(inherited)",
 				);
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -213,41 +289,18 @@
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
-				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_INFINITE_RECURSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_CYCLES = YES;
-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_SUSPICIOUS_MOVE = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				VALIDATE_PRODUCT = YES;
@@ -257,14 +310,13 @@
 		FA8B9C0D1E2F3A4B5C6D7E8F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = FernlinkDemo/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				INFOPLIST_PREPROCESS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -281,14 +333,13 @@
 		FA9B0C1D2E3F4A5B6C7D8E9F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = FernlinkDemo/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				INFOPLIST_PREPROCESS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -324,21 +375,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCLocalSwiftPackageReference section */
-		FC4D5E6F7A8B9C0D1E2F3A4B /* XCLocalSwiftPackageReference "../ios" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = ../ios;
-		};
-/* End XCLocalSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		FC5D6E7F8A9B0C1D2E3F4A5B /* FernlinkSDK */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = FC4D5E6F7A8B9C0D1E2F3A4B /* XCLocalSwiftPackageReference "../ios" */;
-			productName = FernlinkSDK;
-		};
-/* End XCSwiftPackageProductDependency section */
 
 	};
 	rootObject = FA1B2C3D4E5F6A7B8C9D0E1F /* Project object */;

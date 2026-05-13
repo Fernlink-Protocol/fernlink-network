@@ -1,0 +1,48 @@
+{
+  "source": "/Users/anthonydirisu/CursorProjects/fernlink/packages/ios-demo/FernlinkDemo/ContentView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "fernlink demo",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 33
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld peer%@",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 38
+        }
+      },
+      {
+        "comment": "",
+        "key": "scanning…",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 39
+        }
+      },
+      {
+        "comment": "",
+        "key": "tx signature (blank = devnet sample)",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 50
+        }
+      },
+      {
+        "comment": "",
+        "key": "VERIFY",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 67
+        }
+      }
+    ]
+  },
+  "version": 1
+}

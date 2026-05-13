@@ -1,5 +1,4 @@
 import Foundation
-import FernlinkSDK
 
 @MainActor
 final class DemoViewModel: ObservableObject {
