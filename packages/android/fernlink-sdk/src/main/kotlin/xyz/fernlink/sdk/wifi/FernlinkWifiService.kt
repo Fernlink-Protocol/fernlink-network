@@ -44,10 +44,17 @@ class FernlinkWifiService : Service(), FernlinkTransport {
     private var localPubKey = ""
     private var initialised = false
 
+    // Held until startMesh() is called, in case FernlinkClient wires forwarders before init.
+    private var pendingRequestSender: ((ByteArray) -> Unit)? = null
+    private var pendingProofSender: ((ByteArray) -> Unit)? = null
+
     override val transportType: TransportType = TransportType.WIFI_DIRECT
 
     override val connectedPeerCount: Int
         get() = if (initialised) wifiTransport.connectedPeerCount else 0
+
+    override fun connectedPeerFingerprints(): Set<String> =
+        if (initialised) wifiTransport.connectedPeerFingerprints() else emptySet()
 
     override val pendingRequestCount: Int
         get() = if (initialised) store.size else 0
@@ -68,9 +75,9 @@ class FernlinkWifiService : Service(), FernlinkTransport {
         super.onDestroy()
     }
 
-    override fun startMesh(keypairSeed: ByteArray, rpcEndpoint: String) {
+    override fun startMesh(keypairSeed: ByteArray, pubKey: ByteArray, rpcEndpoint: String) {
         if (initialised) return
-        localPubKey = keypairSeed.joinToString("") { "%02x".format(it) }
+        localPubKey = pubKey.joinToString("") { "%02x".format(it) }
         store         = ProofStore()
         wifiTransport = WifiDirectTransport(applicationContext, localPubKey, scope)
         router        = TransportMessageRouter(
@@ -83,9 +90,16 @@ class FernlinkWifiService : Service(), FernlinkTransport {
             keypairSeed       = keypairSeed,
             rpcEndpoint       = rpcEndpoint,
             scope             = scope,
+            context           = applicationContext,
         )
-        wifiTransport.startMesh(keypairSeed, rpcEndpoint)
+        wifiTransport.startMesh(keypairSeed, pubKey, rpcEndpoint)
         router.start()
+        // Apply any forwarders that were set before startMesh() was called.
+        val rs = pendingRequestSender
+        val ps = pendingProofSender
+        if (rs != null && ps != null) router.setExternalForwarders(rs, ps)
+        pendingRequestSender = null
+        pendingProofSender = null
         initialised = true
         updateNotification()
     }
@@ -105,6 +119,30 @@ class FernlinkWifiService : Service(), FernlinkTransport {
         if (initialised) router.collectConsensusJson(minProofs) else null
 
     override fun clearProofs() { if (initialised) router.clearProofs() }
+
+    // ── Gap 3: cross-transport bridge ─────────────────────────────────────────
+
+    override fun setExternalForwarders(requestSender: (ByteArray) -> Unit, proofSender: (ByteArray) -> Unit) {
+        if (initialised) {
+            router.setExternalForwarders(requestSender, proofSender)
+        } else {
+            pendingRequestSender = requestSender
+            pendingProofSender = proofSender
+        }
+    }
+
+    override fun injectRequest(payload: ByteArray) {
+        if (initialised) router.injectRequest(payload)
+    }
+
+    override fun injectProof(payload: ByteArray) {
+        if (initialised) router.injectProof(payload)
+    }
+
+    // ── Gap 4: multi-transport aggregation ────────────────────────────────────
+
+    override fun collectedProofs(): List<String> =
+        if (initialised) router.collectedProofs else emptyList()
 
     private fun updateNotification() {
         scope.launch {

@@ -20,9 +20,9 @@
     <!-- Required for foreground service on Android 9+ -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
 
     <!-- WiFi Direct -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
@@ -45,12 +45,10 @@
             android:exported="false"
             android:foregroundServiceType="connectedDevice" />
 
-        <!-- WiFi Direct service — foregroundServiceType="location" required
-             on Android 14+ for services that trigger peer discovery -->
         <service
             android:name="xyz.fernlink.sdk.wifi.FernlinkWifiService"
             android:exported="false"
-            android:foregroundServiceType="location" />
+            android:foregroundServiceType="connectedDevice" />
     </application>
 
 </manifest>

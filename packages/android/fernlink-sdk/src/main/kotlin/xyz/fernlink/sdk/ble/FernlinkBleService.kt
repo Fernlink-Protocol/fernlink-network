@@ -5,6 +5,8 @@ import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import xyz.fernlink.sdk.transport.FernlinkTransport
 import xyz.fernlink.sdk.transport.TransportType
 
@@ -44,11 +46,12 @@ class FernlinkBleService : Service(), FernlinkTransport {
     private var keypairSeed: ByteArray = ByteArray(32)
     private var initialised = false
 
+    // Held until startMesh() is called, in case FernlinkClient wires forwarders before init.
+    private var pendingRequestSender: ((ByteArray) -> Unit)? = null
+    private var pendingProofSender: ((ByteArray) -> Unit)? = null
+
     override fun onCreate() {
         super.onCreate()
-        store  = ProofStore()
-        server = GattServerManager(applicationContext)
-        client = GattClientManager(applicationContext, store)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -69,13 +72,22 @@ class FernlinkBleService : Service(), FernlinkTransport {
 
     // ── Public API (called by FernlinkClient after binding) ───────────────────
 
-    override fun startMesh(keypairSeed: ByteArray, rpcEndpoint: String) {
+    override fun startMesh(keypairSeed: ByteArray, pubKey: ByteArray, rpcEndpoint: String) {
         if (initialised) return
         this.keypairSeed = keypairSeed.copyOf()
+        store  = ProofStore()
+        server = GattServerManager(applicationContext, pubKey)
+        client = GattClientManager(applicationContext, store)
         router = BleMessageRouter(server, client, store, this.keypairSeed, rpcEndpoint, scope)
         server.start()
         client.startScanning()
         router.start()
+        // Apply any forwarders that were set before startMesh() was called.
+        val rs = pendingRequestSender
+        val ps = pendingProofSender
+        if (rs != null && ps != null) router.setExternalForwarders(rs, ps)
+        pendingRequestSender = null
+        pendingProofSender = null
         initialised = true
         updateNotification()
     }
@@ -90,6 +102,9 @@ class FernlinkBleService : Service(), FernlinkTransport {
     override val connectedPeerCount: Int
         get() = if (initialised) client.connectedPeerCount else 0
 
+    override fun connectedPeerFingerprints(): Set<String> =
+        if (initialised) client.connectedPeerFingerprints else emptySet()
+
     override val pendingRequestCount: Int
         get() = if (initialised) store.size else 0
 
@@ -102,6 +117,35 @@ class FernlinkBleService : Service(), FernlinkTransport {
         if (initialised) router.collectConsensusJson(minProofs) else null
 
     override fun clearProofs() { if (initialised) router.clearProofs() }
+
+    // ── Gap 3: cross-transport bridge ─────────────────────────────────────────
+
+    override fun setExternalForwarders(requestSender: (ByteArray) -> Unit, proofSender: (ByteArray) -> Unit) {
+        if (initialised) {
+            router.setExternalForwarders(requestSender, proofSender)
+        } else {
+            pendingRequestSender = requestSender
+            pendingProofSender = proofSender
+        }
+    }
+
+    override fun injectRequest(payload: ByteArray) {
+        if (initialised) router.injectRequest(payload)
+    }
+
+    override fun injectProof(payload: ByteArray) {
+        if (initialised) router.injectProof(payload)
+    }
+
+    // ── Gap 4: multi-transport aggregation ────────────────────────────────────
+
+    override fun collectedProofs(): List<String> =
+        if (initialised) router.collectedProofs else emptyList()
+
+    // ── Mesh event stream ─────────────────────────────────────────────────────
+
+    val meshEvents: SharedFlow<String>
+        get() = if (initialised) router.meshEvents else MutableSharedFlow()
 
     private fun updateNotification() {
         scope.launch {

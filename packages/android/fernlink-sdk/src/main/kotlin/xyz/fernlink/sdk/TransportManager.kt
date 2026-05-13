@@ -7,6 +7,15 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
 import androidx.core.content.ContextCompat
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import xyz.fernlink.sdk.ble.FernlinkBleService
 import xyz.fernlink.sdk.wifi.FernlinkWifiService
 
@@ -46,12 +55,23 @@ class TransportManager(
     private var bleUnbound  = false
     private var wifiUnbound = false
 
+    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private val _meshEvents = MutableSharedFlow<String>(extraBufferCapacity = 128)
+    val meshEvents: SharedFlow<String> = _meshEvents
+    private var bleEventJob: Job? = null
+
     private val bleConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, binder: IBinder) {
             bleService = (binder as FernlinkBleService.LocalBinder).service
             client.attachTransport(bleService!!)
+            bleEventJob?.cancel()
+            bleEventJob = bleService!!.meshEvents
+                .onEach { _meshEvents.emit(it) }
+                .launchIn(scope)
         }
         override fun onServiceDisconnected(name: ComponentName) {
+            bleEventJob?.cancel()
+            bleEventJob = null
             bleService = null
         }
     }
@@ -74,6 +94,7 @@ class TransportManager(
 
     /** Detach from client, unbind, and stop both services. Call from onDestroy(). */
     fun stopAll() {
+        bleEventJob?.cancel()
         bleService?.let {
             client.detachTransport(it)
             if (!bleUnbound) { activity.unbindService(bleConnection); bleUnbound = true }
@@ -82,6 +103,7 @@ class TransportManager(
             client.detachTransport(it)
             if (!wifiUnbound) { activity.unbindService(wifiConnection); wifiUnbound = true }
         }
+        scope.cancel()
     }
 
     /** Total connected peers across BLE and WiFi Direct transports. */

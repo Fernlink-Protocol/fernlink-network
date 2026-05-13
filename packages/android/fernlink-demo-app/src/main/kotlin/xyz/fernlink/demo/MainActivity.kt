@@ -2,41 +2,81 @@ package xyz.fernlink.demo
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ScrollView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import xyz.fernlink.sdk.Commitment
 import xyz.fernlink.sdk.FernlinkClient
 import xyz.fernlink.sdk.FernlinkClientConfig
 import xyz.fernlink.sdk.TransportManager
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
     private val client = FernlinkClient(
-        FernlinkClientConfig(rpcEndpoint = "https://api.devnet.solana.com")
+        FernlinkClientConfig(rpcEndpoint = "https://api.devnet.solana.com", minProofs = 2)
     )
-    private val scope   = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private lateinit var transportManager: TransportManager
+
+    // UI refs
+    private lateinit var tvPeers: TextView
+    private lateinit var vStatusDot: View
+    private lateinit var tvVerifierLog: TextView
+    private lateinit var tvVerifierStatus: TextView
+    private lateinit var svVerifier: ScrollView
+    private lateinit var tvLog: TextView
+    private lateinit var svRequester: ScrollView
+    private lateinit var etSignature: EditText
+    private lateinit var btnVerify: Button
+
+    private val timeFmt = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Let the app draw behind system bars; we handle the insets ourselves
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContentView(R.layout.activity_main)
+
+        // Pad the root view so content never hides under system bars or soft keyboard
+        val root = findViewById<View>(android.R.id.content)
+        ViewCompat.setOnApplyWindowInsetsListener(root) { v, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val ime  = insets.getInsets(WindowInsetsCompat.Type.ime())
+            v.setPadding(bars.left, bars.top, bars.right, maxOf(bars.bottom, ime.bottom))
+            insets
+        }
+
         client.start()
         transportManager = TransportManager(this, client)
 
-        val etSignature  = findViewById<EditText>(R.id.etSignature)
-        val btnVerify    = findViewById<Button>(R.id.btnVerify)
-        val tvLog        = findViewById<TextView>(R.id.tvLog)
+        tvPeers        = findViewById(R.id.tvPeers)
+        vStatusDot     = findViewById(R.id.vStatusDot)
+        tvVerifierLog  = findViewById(R.id.tvVerifierLog)
+        tvVerifierStatus = findViewById(R.id.tvVerifierStatus)
+        svVerifier     = findViewById(R.id.svVerifier)
+        tvLog          = findViewById(R.id.tvLog)
+        svRequester    = findViewById(R.id.svRequester)
+        etSignature    = findViewById(R.id.etSignature)
+        btnVerify      = findViewById(R.id.btnVerify)
 
-        log(tvLog, "Fernlink SDK initialised")
-        log(tvLog, "Device public key: ${client.publicKey.take(16)}…")
-        log(tvLog, "RPC: https://api.devnet.solana.com\n")
+        verifierLog("Device key: ${client.publicKey.take(16)}…")
 
         requestPermissionsAndStartServices()
 
@@ -44,9 +84,11 @@ class MainActivity : AppCompatActivity() {
             val sig = etSignature.text.toString().trim()
             btnVerify.isEnabled = false
             tvLog.text = ""
-            scope.launch { runDemo(tvLog, btnVerify, sig.ifEmpty { null }) }
+            scope.launch { runRequester(sig.ifEmpty { null }) }
         }
     }
+
+    // ── Permission + service startup ─────────────────────────────────────────
 
     private fun requestPermissionsAndStartServices() {
         val needed = mutableListOf<String>()
@@ -55,68 +97,135 @@ class MainActivity : AppCompatActivity() {
                 Manifest.permission.BLUETOOTH_SCAN,
                 Manifest.permission.BLUETOOTH_ADVERTISE,
                 Manifest.permission.BLUETOOTH_CONNECT,
-            ).forEach { if (ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED) needed += it }
+            ).forEach {
+                if (ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED)
+                    needed += it
+            }
         } else {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-                needed += Manifest.permission.ACCESS_FINE_LOCATION
-            }
+                != PackageManager.PERMISSION_GRANTED) needed += Manifest.permission.ACCESS_FINE_LOCATION
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.NEARBY_WIFI_DEVICES)
-                != PackageManager.PERMISSION_GRANTED) {
-                needed += Manifest.permission.NEARBY_WIFI_DEVICES
-            }
+                != PackageManager.PERMISSION_GRANTED) needed += Manifest.permission.NEARBY_WIFI_DEVICES
         }
-
-        if (needed.isNotEmpty()) {
-            ActivityCompat.requestPermissions(this, needed.toTypedArray(), RC_PERMS)
-        } else {
-            transportManager.startAll()
-            updatePeerCount()
-        }
+        if (needed.isNotEmpty()) ActivityCompat.requestPermissions(this, needed.toTypedArray(), RC_PERMS)
+        else startServicesAndObserve()
     }
 
     override fun onRequestPermissionsResult(rc: Int, perms: Array<out String>, grants: IntArray) {
         super.onRequestPermissionsResult(rc, perms, grants)
-        if (rc == RC_PERMS) {
-            transportManager.startAll()
-            updatePeerCount()
-        }
+        if (rc == RC_PERMS) startServicesAndObserve()
     }
 
-    private fun updatePeerCount() {
+    private fun startServicesAndObserve() {
+        transportManager.startAll()
+        observePeerCount()
+        observeMeshEvents()
+    }
+
+    // ── Peer count ticker ────────────────────────────────────────────────────
+
+    private fun observePeerCount() {
         scope.launch {
             while (true) {
                 val count = transportManager.connectedPeerCount
-                val tv = findViewById<TextView>(R.id.tvPeers)
-                tv?.text = if (count == 0) "Scanning (BLE + WiFi Direct)…"
-                           else "$count peer${if (count == 1) "" else "s"} connected"
-                delay(3_000)
+                val dot = vStatusDot
+                if (count > 0) {
+                    tvPeers.text = "$count peer${if (count == 1) "" else "s"} connected"
+                    tvPeers.setTextColor(Color.parseColor("#22C55E"))
+                    dot.setBackgroundColor(Color.parseColor("#22C55E"))
+                } else {
+                    tvPeers.text = "Scanning for peers…"
+                    tvPeers.setTextColor(Color.parseColor("#9CA3AF"))
+                    dot.setBackgroundColor(Color.parseColor("#374151"))
+                }
+                delay(2_000)
             }
         }
     }
 
-    private suspend fun runDemo(tvLog: TextView, btn: Button, customSig: String?) {
-        log(tvLog, "─── Fernlink Transaction Verification ───\n")
+    // ── Mesh event observer (verifier panel) ─────────────────────────────────
+
+    private fun observeMeshEvents() {
+        transportManager.meshEvents
+            .onEach { event -> handleMeshEvent(event) }
+            .launchIn(scope)
+    }
+
+    private fun handleMeshEvent(event: String) {
+        val ts = timeFmt.format(Date())
+        when {
+            event.startsWith("REQUEST_IN:") -> {
+                val sig = event.removePrefix("REQUEST_IN:")
+                tvVerifierStatus.text = "active"
+                tvVerifierStatus.setTextColor(Color.parseColor("#F59E0B"))
+                verifierLog("[$ts] ← Request from peer")
+                verifierLog("     tx: $sig…")
+            }
+            event == "RPC_QUERYING" -> {
+                verifierLog("[$ts]   Querying Solana RPC…")
+            }
+            event.startsWith("PROOF_SENT:") -> {
+                val parts = event.removePrefix("PROOF_SENT:").split(":")
+                val status = parts.getOrNull(0) ?: "?"
+                val slot   = parts.getOrNull(1) ?: "?"
+                verifierLog("[$ts] → Proof signed & sent")
+                verifierLog("     status=$status  slot=$slot")
+                tvVerifierStatus.text = "sent proof"
+                tvVerifierStatus.setTextColor(Color.parseColor("#22C55E"))
+            }
+            event == "RPC_FAIL" -> {
+                verifierLog("[$ts]   No internet — cannot verify")
+                tvVerifierStatus.text = "no RPC"
+                tvVerifierStatus.setTextColor(Color.parseColor("#EF4444"))
+            }
+            event.startsWith("FORWARDING:") -> {
+                val ttl = event.removePrefix("FORWARDING:")
+                verifierLog("[$ts]   Forwarding into mesh (ttl=$ttl)")
+            }
+            event.startsWith("PROOF_RECV:") -> {
+                // requester side — also reflected in requester panel via runRequester
+            }
+        }
+        svVerifier.post { svVerifier.fullScroll(ScrollView.FOCUS_DOWN) }
+    }
+
+    // ── Requester flow ───────────────────────────────────────────────────────
+
+    private suspend fun runRequester(customSig: String?) {
+        val ts = { timeFmt.format(Date()) }
+
+        requesterLog("─── Fernlink Verification ───\n")
 
         val signature = customSig ?: withContext(Dispatchers.IO) { fetchDevnetSample() }
         if (signature == null) {
-            log(tvLog, "[ERROR] Could not fetch a devnet transaction. Check network.")
-            btn.isEnabled = true
+            requesterLog("[ERROR] Could not fetch a devnet transaction. Check network.")
+            btnVerify.isEnabled = true
             return
         }
 
-        log(tvLog, "[1] Transaction signature:")
-        log(tvLog, "    ${signature.take(32)}…\n")
-        log(tvLog, "[2] Querying Solana devnet via RPC…")
+        requesterLog("[${ts()}] tx: ${signature.take(20)}…\n")
 
         val peers = transportManager.connectedPeerCount
         if (peers > 0) {
-            log(tvLog, "[MESH] Broadcasting to $peers peer${if (peers == 1) "" else "s"} (BLE + WiFi)…")
+            requesterLog("[${ts()}] Broadcasting to $peers peer${if (peers == 1) "" else "s"}…")
         } else {
-            log(tvLog, "[MESH] No peers — local proof only\n")
+            requesterLog("[${ts()}] No peers — direct RPC\n")
         }
+
+        // observe incoming proofs while we wait
+        val proofJob = transportManager.meshEvents
+            .onEach { event ->
+                if (event.startsWith("PROOF_RECV:")) {
+                    val parts  = event.removePrefix("PROOF_RECV:").split(":")
+                    val count  = parts.getOrNull(0)?.toIntOrNull() ?: 1
+                    val pubKey = parts.getOrNull(1)?.takeIf { it.length >= 16 }
+                        ?.let { "${it.take(8)}…${it.takeLast(8)}" } ?: "unknown"
+                    requesterLog("[${ts()}] ← Proof #$count from $pubKey")
+                }
+            }
+            .launchIn(scope)
 
         val result = runCatching {
             withContext(Dispatchers.IO) {
@@ -128,27 +237,45 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        proofJob.cancel()
+
         result.onSuccess { consensus ->
-            log(tvLog, "[3] Signing Ed25519 proof via Rust core (JNI)…")
-            log(tvLog, "    Verifier: ${client.publicKey.take(16)}…\n")
-            log(tvLog, "[4] Self-verifying proof signature… OK\n")
-            log(tvLog, "[5] Consensus result:")
-            log(tvLog, "    settled    = ${consensus.settled}")
-            log(tvLog, "    status     = ${consensus.status ?: "—"}")
-            consensus.slot?.let      { log(tvLog, "    slot       = $it") }
-            consensus.blockTime?.let { log(tvLog, "    block time = $it") }
-            log(tvLog, "    proofCount = ${consensus.proofCount}\n")
-            if (consensus.settled) log(tvLog, "✅ VERIFIED — ${consensus.status}")
-            else                   log(tvLog, "⚠️  NOT SETTLED — need more peers")
+            requesterLog("")
+            val count = consensus.proofCount ?: 0
+            if (consensus.settled) {
+                requesterLog("✅ VERIFIED ($count/2 devices agree)")
+            } else if (count > 0) {
+                requesterLog("⚠  PARTIAL — $count/2 devices agree")
+            } else {
+                requesterLog("⚠  NOT SETTLED")
+            }
+            requesterLog("   status     = ${consensus.status ?: "—"}")
+            consensus.slot?.let      { requesterLog("   slot       = $it") }
+            consensus.blockTime?.let { requesterLog("   block time = $it") }
+            requesterLog("   proofs     = $count")
         }
 
-        result.onFailure { e -> log(tvLog, "[ERROR] ${e.message}") }
+        result.onFailure { e ->
+            requesterLog("\n[ERROR] ${e.message}")
+        }
 
-        log(tvLog, "\n─────────────────────────────────────────")
-        btn.isEnabled = true
+        requesterLog("\n────────────────────────────")
+        btnVerify.isEnabled = true
     }
 
-    private fun log(tv: TextView, line: String) { tv.append("$line\n") }
+    // ── Logging helpers ──────────────────────────────────────────────────────
+
+    private fun verifierLog(line: String) {
+        tvVerifierLog.append("$line\n")
+        svVerifier.post { svVerifier.fullScroll(ScrollView.FOCUS_DOWN) }
+    }
+
+    private fun requesterLog(line: String) {
+        tvLog.append("$line\n")
+        svRequester.post { svRequester.fullScroll(ScrollView.FOCUS_DOWN) }
+    }
+
+    // ── Devnet sample fetch ──────────────────────────────────────────────────
 
     private fun fetchDevnetSample(): String? = runCatching {
         val body = """{"jsonrpc":"2.0","id":1,"method":"getSignaturesForAddress",
@@ -161,7 +288,7 @@ class MainActivity : AppCompatActivity() {
         conn.doOutput = true
         conn.outputStream.write(body.toByteArray())
         val text = conn.inputStream.bufferedReader().readText()
-        val arr  = org.json.JSONObject(text).getJSONObject("result").getJSONArray("value")
+        val arr = org.json.JSONObject(text).getJSONObject("result").getJSONArray("value")
         if (arr.length() == 0) null else arr.getJSONObject(0).getString("signature")
     }.getOrNull()
 
@@ -172,5 +299,7 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
     }
 
-    companion object { private const val RC_PERMS = 100 }
+    companion object {
+        private const val RC_PERMS = 100
+    }
 }

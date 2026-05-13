@@ -3,75 +3,197 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="24dp"
-    android:background="#0F1117">
+    android:background="#0A0E1A">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="🌿 Fernlink Demo"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:textColor="#22C55E"
-        android:layout_marginBottom="2dp" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Solana Transaction Verification via Ed25519 Mesh Proofs"
-        android:textSize="12sp"
-        android:textColor="#9CA3AF"
-        android:layout_marginBottom="8dp" />
-
-    <TextView
-        android:id="@+id/tvPeers"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="BLE: scanning…"
-        android:textSize="12sp"
-        android:textColor="#60A5FA"
-        android:layout_marginBottom="16dp" />
-
-    <EditText
-        android:id="@+id/etSignature"
+    <!-- ── Header ──────────────────────────────────────────────────────────── -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Transaction signature (leave blank for devnet sample)"
-        android:textColorHint="#6B7280"
-        android:textColor="#F9FAFB"
-        android:background="@android:color/transparent"
-        android:paddingVertical="12dp"
-        android:textSize="13sp"
-        android:inputType="text"
-        android:singleLine="true"
-        android:layout_marginBottom="16dp" />
+        android:orientation="vertical"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="20dp"
+        android:paddingBottom="12dp"
+        android:background="#0F1420">
 
-    <Button
-        android:id="@+id/btnVerify"
-        android:layout_width="match_parent"
-        android:layout_height="52dp"
-        android:text="Verify Transaction"
-        android:textColor="#FFFFFF"
-        android:backgroundTint="#16A34A"
-        android:layout_marginBottom="24dp" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🌿 Fernlink"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="#22C55E" />
 
-    <ScrollView
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Solana mesh verification · Ed25519"
+            android:textSize="11sp"
+            android:textColor="#6B7280"
+            android:layout_marginTop="2dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="10dp"
+            android:gravity="center_vertical">
+
+            <View
+                android:id="@+id/vStatusDot"
+                android:layout_width="8dp"
+                android:layout_height="8dp"
+                android:background="#374151"
+                android:layout_marginEnd="8dp" />
+
+            <TextView
+                android:id="@+id/tvPeers"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Scanning for peers…"
+                android:textSize="12sp"
+                android:textColor="#9CA3AF"
+                android:fontFamily="monospace" />
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- ── VERIFIER PANEL ──────────────────────────────────────────────────── -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:background="#1A1F2E"
-        android:padding="12dp">
+        android:orientation="vertical"
+        android:background="#0B1220"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="8dp">
 
-        <TextView
-            android:id="@+id/tvLog"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Tap 'Verify Transaction' to begin...\n"
-            android:textColor="#D1FAE5"
-            android:fontFamily="monospace"
-            android:textSize="12sp"
-            android:lineSpacingExtra="4dp" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
 
-    </ScrollView>
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="VERIFIER"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:textColor="#3B82F6"
+                android:letterSpacing="0.15"
+                android:fontFamily="monospace" />
+
+            <TextView
+                android:id="@+id/tvVerifierStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="idle"
+                android:textSize="10sp"
+                android:textColor="#374151"
+                android:fontFamily="monospace" />
+
+        </LinearLayout>
+
+        <ScrollView
+            android:id="@+id/svVerifier"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="#060C18"
+            android:padding="10dp">
+
+            <TextView
+                android:id="@+id/tvVerifierLog"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Waiting for requests from peers…\n"
+                android:textColor="#4B5563"
+                android:fontFamily="monospace"
+                android:textSize="11sp"
+                android:lineSpacingExtra="3dp" />
+
+        </ScrollView>
+
+    </LinearLayout>
+
+    <!-- ── DIVIDER ─────────────────────────────────────────────────────────── -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#1F2937" />
+
+    <!-- ── REQUESTER PANEL ─────────────────────────────────────────────────── -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:background="#0D1117"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="REQUESTER"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:textColor="#22C55E"
+            android:letterSpacing="0.15"
+            android:fontFamily="monospace"
+            android:layout_marginBottom="8dp" />
+
+        <EditText
+            android:id="@+id/etSignature"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="tx signature (blank = fetch from devnet)"
+            android:textColorHint="#374151"
+            android:textColor="#D1FAE5"
+            android:background="@android:color/transparent"
+            android:paddingVertical="8dp"
+            android:textSize="12sp"
+            android:fontFamily="monospace"
+            android:inputType="text"
+            android:singleLine="true"
+            android:layout_marginBottom="10dp" />
+
+        <Button
+            android:id="@+id/btnVerify"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:text="BROADCAST VERIFICATION REQUEST"
+            android:textSize="11sp"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#166534"
+            android:fontFamily="monospace"
+            android:layout_marginBottom="10dp" />
+
+        <ScrollView
+            android:id="@+id/svRequester"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="#060C0A"
+            android:padding="10dp">
+
+            <TextView
+                android:id="@+id/tvLog"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Tap the button to broadcast a verification request.\n"
+                android:textColor="#4B5563"
+                android:fontFamily="monospace"
+                android:textSize="11sp"
+                android:lineSpacingExtra="3dp" />
+
+        </ScrollView>
+
+    </LinearLayout>
 
 </LinearLayout>

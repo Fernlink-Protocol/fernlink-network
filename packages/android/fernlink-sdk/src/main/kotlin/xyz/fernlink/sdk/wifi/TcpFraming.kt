@@ -9,11 +9,13 @@ import java.io.OutputStream
  * Wire format per message: [typeTag: 1 byte][length: 4 bytes BE][payload: length bytes]
  *
  * typeTag values:
+ *   TYPE_HELLO   = 0x00 — Pubkey fingerprint (16 hex chars) sent immediately on connect
  *   TYPE_REQUEST = 0x01 — VerificationRequest JSON
  *   TYPE_PROOF   = 0x02 — VerificationProof JSON
  */
 internal object TcpFraming {
 
+    const val TYPE_HELLO:   Byte = 0x00
     const val TYPE_REQUEST: Byte = 0x01
     const val TYPE_PROOF:   Byte = 0x02
 

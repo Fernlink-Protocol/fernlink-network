@@ -19,6 +19,7 @@ import xyz.fernlink.sdk.transport.FernlinkTransport
 import xyz.fernlink.sdk.transport.TransportType
 import java.net.ServerSocket
 import java.net.Socket
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 
 /**
@@ -46,8 +47,11 @@ internal class WifiDirectTransport(
     private val _incomingProofs = MutableSharedFlow<ByteArray>(extraBufferCapacity = 32)
     val incomingProofs: SharedFlow<ByteArray> = _incomingProofs
 
-    private val sockets    = CopyOnWriteArrayList<Socket>()
-    private val socketLock = Any()
+    private val sockets         = CopyOnWriteArrayList<Socket>()
+    private val socketLock      = Any()
+    private val connectingAddrs = CopyOnWriteArrayList<String>()
+    // Maps each open socket to the peer's pubkey fingerprint received via TYPE_HELLO.
+    private val socketToFp      = ConcurrentHashMap<Socket, String>()
 
     private lateinit var wifiP2pManager: WifiP2pManager
     private lateinit var p2pChannel:     WifiP2pManager.Channel
@@ -66,7 +70,9 @@ internal class WifiDirectTransport(
     override val connectedPeerCount: Int get() = sockets.size
     override val pendingRequestCount: Int get() = 0
 
-    override fun startMesh(keypairSeed: ByteArray, rpcEndpoint: String) {
+    override fun connectedPeerFingerprints(): Set<String> = socketToFp.values.toSet()
+
+    override fun startMesh(keypairSeed: ByteArray, pubKey: ByteArray, rpcEndpoint: String) {
         if (started) return
         wifiP2pManager = context.getSystemService(Context.WIFI_P2P_SERVICE) as WifiP2pManager
         p2pChannel = wifiP2pManager.initialize(context, context.mainLooper, null)
@@ -89,6 +95,7 @@ internal class WifiDirectTransport(
         if (!started) return
         sockets.forEach { runCatching { it.close() } }
         sockets.clear()
+        socketToFp.clear()
         serverSocket?.close()
         serverSocket = null
         runCatching { context.unregisterReceiver(receiver) }
@@ -110,6 +117,21 @@ internal class WifiDirectTransport(
 
     fun sendProof(payload: ByteArray) = sendToAll(TcpFraming.TYPE_PROOF, WirePayload.encode(payload))
     fun sendRequest(payload: ByteArray) = sendToAll(TcpFraming.TYPE_REQUEST, WirePayload.encode(payload))
+
+    /** Relay a request from another transport to WiFi Direct peers — no local RPC. */
+    override fun injectRequest(payload: ByteArray) = sendToAll(TcpFraming.TYPE_REQUEST, WirePayload.encode(payload))
+
+    /** Relay a proof from another transport to WiFi Direct peers. */
+    override fun injectProof(payload: ByteArray) = sendToAll(TcpFraming.TYPE_PROOF, WirePayload.encode(payload))
+
+    private fun sendHello(socket: Socket) {
+        runCatching {
+            synchronized(socketLock) {
+                TcpFraming.write(socket.getOutputStream(), TcpFraming.TYPE_HELLO,
+                    localPubKey.take(16).toByteArray(Charsets.UTF_8))
+            }
+        }
+    }
 
     private fun sendToAll(typeTag: Byte, payload: ByteArray) {
         val dead = mutableListOf<Socket>()
@@ -152,8 +174,11 @@ internal class WifiDirectTransport(
         // Deterministic GO election: lower pubkey = client (connects),
         // higher pubkey = preferred GO (waits to be connected to).
         if (localPubKey < peerPubKey) {
+            val addr = device.deviceAddress
+            if (connectingAddrs.contains(addr)) return  // already connecting, skip duplicate
+            connectingAddrs.add(addr)
             val config = WifiP2pConfig().apply {
-                deviceAddress = device.deviceAddress
+                deviceAddress = addr
                 groupOwnerIntent = 0   // prefer to be client
             }
             wifiP2pManager.connect(p2pChannel, config, null)
@@ -206,6 +231,7 @@ internal class WifiDirectTransport(
                 runCatching {
                     val socket = ss.accept()
                     sockets.add(socket)
+                    sendHello(socket)
                     launch { readLoop(socket) }
                 }
             }
@@ -219,6 +245,7 @@ internal class WifiDirectTransport(
             runCatching {
                 val socket = Socket(goAddress, TCP_PORT)
                 sockets.add(socket)
+                sendHello(socket)
                 readLoop(socket)
             }
         }
@@ -232,12 +259,14 @@ internal class WifiDirectTransport(
             while (!socket.isClosed) {
                 val (typeTag, payload) = TcpFraming.read(input) ?: break
                 when (typeTag) {
+                    TcpFraming.TYPE_HELLO   -> socketToFp[socket] = String(payload, Charsets.UTF_8)
                     TcpFraming.TYPE_REQUEST -> _incomingRequests.emit(WirePayload.decode(payload))
                     TcpFraming.TYPE_PROOF   -> _incomingProofs.emit(WirePayload.decode(payload))
                 }
             }
         }
         sockets.remove(socket)
+        socketToFp.remove(socket)
         runCatching { socket.close() }
     }
 }
