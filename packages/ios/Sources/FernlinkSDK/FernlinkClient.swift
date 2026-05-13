@@ -4,6 +4,10 @@ public final class FernlinkClient {
 
     public let publicKey: String
 
+    public var onMeshEvent: ((String) -> Void)? {
+        didSet { transports.forEach { $0.router.onMeshEvent = onMeshEvent } }
+    }
+
     private let keypair:   FernlinkKeypair
     private let rpc:       SolanaRpc
     private let config:    FernlinkClientConfig
@@ -46,6 +50,7 @@ public final class FernlinkClient {
             rpcEndpoint: config.rpcEndpoint,
             proofStore:  proofStore
         )
+        router.onMeshEvent = onMeshEvent
         transport.start()
         router.start()
         transports.append((transport: transport, router: router))

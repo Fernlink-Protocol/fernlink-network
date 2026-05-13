@@ -15,6 +15,7 @@ final class TransportMessageRouter {
 
     var externalRequestSender: ((Data) -> Void)?
     var externalProofSender:   ((Data) -> Void)?
+    var onMeshEvent:           ((String) -> Void)?
 
     init(
         transport:   FernlinkTransport,
@@ -98,7 +99,9 @@ final class TransportMessageRouter {
                 let isOwn = routerLock.withLock { _originatedRequestIds.contains(reqId) }
                 if isOwn { return }
             }
+            onMeshEvent?("REQUEST_IN:\(json.txSignature.prefix(20))")
             do {
+                onMeshEvent?("RPC_QUERYING")
                 let status = try await rpc.getSignatureStatus(json.txSignature)
                 let proof  = try keypair.signProof(
                     txSignature: json.txSignature,
@@ -109,8 +112,16 @@ final class TransportMessageRouter {
                 )
                 if let proofData = try? JSONEncoder().encode(proof) {
                     transport.sendProof(proofData)
+                    let statusStr: String
+                    switch proof.status {
+                    case .confirmed: statusStr = "Confirmed"
+                    case .failed:    statusStr = "Failed"
+                    case .unknown:   statusStr = "Unknown"
+                    }
+                    onMeshEvent?("PROOF_SENT:\(statusStr):\(proof.slot)")
                 }
             } catch {
+                onMeshEvent?("RPC_FAIL")
                 if json.ttl > 0 {
                     let forwarded = VerificationRequest(
                         txSignature: json.txSignature,
@@ -121,6 +132,7 @@ final class TransportMessageRouter {
                     if let fwdData = try? JSONEncoder().encode(forwarded) {
                         transport.sendRequest(fwdData)
                         externalRequestSender?(fwdData)
+                        onMeshEvent?("FORWARDING:\(json.ttl - 1)")
                     }
                 }
             }
@@ -131,14 +143,16 @@ final class TransportMessageRouter {
         guard let proof = try? JSONDecoder().decode(VerificationProof.self, from: data),
               verifyProof(proof)
         else { return }
-        let added: Bool = routerLock.withLock {
+        let (added, count): (Bool, Int) = routerLock.withLock {
             let txKey = String(_currentTxSig.prefix(64))
-            guard !txKey.isEmpty, proof.txSignature == txKey else { return false }
-            guard _seenVerifierKeys.insert(proof.verifierPublicKey).inserted else { return false }
+            guard !txKey.isEmpty, proof.txSignature == txKey else { return (false, 0) }
+            guard _seenVerifierKeys.insert(proof.verifierPublicKey).inserted else { return (false, 0) }
             _collectedProofs.append(proof)
-            return true
+            return (true, _collectedProofs.count)
         }
         if added {
+            let pubKey = proof.verifierPublicKey.map { String(format: "%02x", $0) }.joined()
+            onMeshEvent?("PROOF_RECV:\(count):\(pubKey)")
             transport.sendProof(data)
             externalProofSender?(data)
         }
