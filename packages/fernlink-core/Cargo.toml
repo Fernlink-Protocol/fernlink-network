@@ -1,6 +1,6 @@
 [package]
 name = "fernlink-core"
-version = "0.2.4"
+version = "0.2.5"
 edition = "2021"
 description = "Core cryptographic primitives and protocol implementation for the Fernlink mesh verification network"
 license = "Apache-2.0"
