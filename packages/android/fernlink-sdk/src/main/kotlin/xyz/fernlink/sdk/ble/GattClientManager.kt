@@ -97,9 +97,10 @@ internal class GattClientManager(
     /** Only peers whose CCC subscription is confirmed count as connected. */
     val connectedPeerCount: Int get() = subscribedPeers.size
 
-    /** Fingerprints of fully subscribed peers (16 hex chars = first 8 bytes of pubkey). */
+    /** Fingerprints of fully subscribed peers. Falls back to "mac:<address>" for peers
+     *  (e.g. iOS) that do not include a manufacturer-data fingerprint in their advertisement. */
     val connectedPeerFingerprints: Set<String>
-        get() = subscribedPeers.mapNotNull { addressToFingerprint[it] }.toSet()
+        get() = subscribedPeers.map { addr -> addressToFingerprint[addr] ?: "mac:$addr" }.toSet()
 
     companion object {
         private const val MAX_PEERS    = 4
@@ -237,13 +238,18 @@ internal class GattClientManager(
                 Log.w(TAG, "CHAR_PROOF not found on ${gatt.device.address}")
                 return
             }
-            Log.d(TAG, "Subscribing to PROOF indications on ${gatt.device.address}")
+            // Adapt to whatever the remote peer supports — iOS uses NOTIFY, Android uses INDICATE.
+            val cccValue = if (proofChar.properties and BluetoothGattCharacteristic.PROPERTY_INDICATE != 0)
+                BluetoothGattDescriptor.ENABLE_INDICATION_VALUE
+            else
+                BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
+            Log.d(TAG, "Subscribing to PROOF ${if (cccValue.contentEquals(BluetoothGattDescriptor.ENABLE_INDICATION_VALUE)) "indications" else "notifications"} on ${gatt.device.address}")
             gatt.setCharacteristicNotification(proofChar, true)
             val ccc = proofChar.getDescriptor(BleUuids.DESCRIPTOR_CCC) ?: run {
                 Log.w(TAG, "CCC descriptor not found on ${gatt.device.address}")
                 return
             }
-            writeDescriptorCompat(gatt, ccc, BluetoothGattDescriptor.ENABLE_INDICATION_VALUE)
+            writeDescriptorCompat(gatt, ccc, cccValue)
         }
 
         override fun onDescriptorWrite(

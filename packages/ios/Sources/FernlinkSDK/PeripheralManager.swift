@@ -14,6 +14,8 @@ final class FernlinkPeripheralManager: NSObject {
     private var subscribedCentrals: [CBCentral] = []
     private let reassembler = BleFragmentation.Reassembler()
     private let queue = DispatchQueue(label: "xyz.fernlink.peripheral")
+    // Fragments waiting to be sent — drained by peripheralManagerIsReady.
+    private var pendingFragments: [(frag: Data, central: CBCentral)] = []
 
     override init() {
         super.init()
@@ -31,10 +33,30 @@ final class FernlinkPeripheralManager: NSObject {
     }
 
     /// Push a signed proof to all subscribed centrals.
+    /// Fragments per-central using the negotiated ATT MTU, and queues unsent
+    /// fragments for delivery via peripheralManagerIsReady(toUpdateSubscribers:).
     func sendProof(_ data: Data) {
-        let frags = BleFragmentation.fragment(encodeWirePayload(data))
-        for frag in frags {
-            manager.updateValue(frag, for: proofChar, onSubscribedCentrals: nil)
+        let encoded = encodeWirePayload(data)
+        for central in subscribedCentrals {
+            // maximumUpdateValueLength is the negotiated ATT payload size (MTU - 3 overhead).
+            // Use it as the total fragment size (header + chunk) so no fragment exceeds what
+            // the central can receive — Android typically negotiates 182 bytes here.
+            let fragSize = max(3, central.maximumUpdateValueLength)
+            let frags = BleFragmentation.fragment(encoded, fragmentSize: fragSize)
+            pendingFragments.append(contentsOf: frags.map { (frag: $0, central: central) })
+        }
+        drainPendingFragments()
+    }
+
+    private func drainPendingFragments() {
+        while !pendingFragments.isEmpty {
+            let entry = pendingFragments[0]
+            if manager.updateValue(entry.frag, for: proofChar, onSubscribedCentrals: [entry.central]) {
+                pendingFragments.removeFirst()
+            } else {
+                // Queue full — peripheralManagerIsReady will resume delivery.
+                return
+            }
         }
     }
 
@@ -104,5 +126,10 @@ extension FernlinkPeripheralManager: CBPeripheralManagerDelegate {
                            central: CBCentral,
                            didUnsubscribeFrom characteristic: CBCharacteristic) {
         subscribedCentrals.removeAll { $0 == central }
+        pendingFragments.removeAll { $0.central == central }
+    }
+
+    func peripheralManagerIsReady(toUpdateSubscribers peripheral: CBPeripheralManager) {
+        drainPendingFragments()
     }
 }

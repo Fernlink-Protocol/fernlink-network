@@ -31,7 +31,7 @@ public func compress(_ data: Data, codec: FernlinkCodec) -> Data {
 }
 
 /// Prepend codec byte and compress — mirrors encodeWirePayload in TypeScript web-peer.ts.
-public func encodeWirePayload(_ data: Data, codec: FernlinkCodec = .lz4) -> Data {
+public func encodeWirePayload(_ data: Data, codec: FernlinkCodec = .none) -> Data {
     var out = Data([codec.rawValue])
     out.append(compress(data, codec: codec))
     return out

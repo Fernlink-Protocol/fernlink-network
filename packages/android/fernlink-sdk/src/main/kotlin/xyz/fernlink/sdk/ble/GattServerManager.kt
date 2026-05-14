@@ -39,6 +39,9 @@ internal class GattServerManager(
     private val scope        = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private val notifyMutex  = Mutex()
     @Volatile private var notifyAck: CompletableDeferred<Unit>? = null
+    // Device address we're currently awaiting an onNotificationSent callback from.
+    // Prevents late callbacks from other devices prematurely completing the live ack.
+    @Volatile private var notifyTargetAddress: String? = null
 
     private var gattServer: BluetoothGattServer? = null
     private val subscribedDevices  = mutableMapOf<String, BluetoothDevice>()
@@ -89,13 +92,21 @@ internal class GattServerManager(
                 val attPayload = mtu - 3
                 val fragments = BleFragmentation.fragment(encoded, attPayload)
                 Log.d(TAG, "sendProof: ${fragments.size} fragment(s) → ${device.address} (mtu=$mtu attPayload=$attPayload)")
+                var stale = false
                 for (frag in fragments) {
                     val ack = CompletableDeferred<Unit>()
+                    notifyTargetAddress = device.address
                     notifyAck = ack
                     notifyCompat(server, device, proofChar, frag)
-                    // Wait for onNotificationSent before sending the next fragment.
-                    // 2-second timeout guards against a stack that never fires the callback.
-                    withTimeoutOrNull(2_000) { ack.await() }
+                    // 2-second timeout: if onNotificationSent never fires the device is stale
+                    // (iOS MAC rotation leaves ghost entries). Evict it so future proofs are fast.
+                    val sent = withTimeoutOrNull(2_000) { ack.await() }
+                    if (sent == null) { stale = true; break }
+                }
+                if (stale) {
+                    Log.w(TAG, "sendProof: evicting stale subscriber ${device.address}")
+                    subscribedDevices.remove(device.address)
+                    subscriberRefCount.remove(device.address)
                 }
             }
         }
@@ -153,8 +164,10 @@ internal class GattServerManager(
     private val gattCallback = object : BluetoothGattServerCallback() {
 
         override fun onNotificationSent(device: BluetoothDevice, status: Int) {
+            if (device.address != notifyTargetAddress) return
             notifyAck?.complete(Unit)
             notifyAck = null
+            notifyTargetAddress = null
         }
 
         override fun onCharacteristicWriteRequest(

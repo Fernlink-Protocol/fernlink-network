@@ -13,8 +13,14 @@ final class FernlinkCentralManager: NSObject {
     private var reassemblers: [UUID: BleFragmentation.Reassembler] = [:]
     private let proofStore:   ProofStore
     private let queue = DispatchQueue(label: "xyz.fernlink.central")
+    // Pending write-without-response fragments per peripheral.
+    private var pendingWrites: [UUID: [(frag: Data, char: CBCharacteristic)]] = [:]
 
-    var connectedPeerCount: Int { peripherals.count }
+    // Only count peers where service discovery is complete and we have CHAR_REQUEST.
+    // peripherals.count counts devices the moment they're discovered, before the
+    // connect→discover→CCC sequence finishes — using it caused broadcastRequest to
+    // fire while requestChars was still empty, silently dropping the write.
+    var connectedPeerCount: Int { requestChars.count }
 
     init(proofStore: ProofStore) {
         self.proofStore = proofStore
@@ -24,7 +30,12 @@ final class FernlinkCentralManager: NSObject {
 
     func startScanning() {
         guard manager.state == .poweredOn else { return }
-        manager.scanForPeripherals(withServices: [BleUuids.fernlinkService], options: nil)
+        // allowDuplicates: true ensures we rediscover a peer after a failed connection attempt.
+        // Without it, iOS delivers one scan result per device and never retries if connect fails.
+        manager.scanForPeripherals(
+            withServices: [BleUuids.fernlinkService],
+            options: [CBCentralManagerScanOptionAllowDuplicatesKey: true]
+        )
     }
 
     func stop() {
@@ -33,16 +44,30 @@ final class FernlinkCentralManager: NSObject {
         peripherals.removeAll()
         requestChars.removeAll()
         reassemblers.removeAll()
+        pendingWrites.removeAll()
     }
 
     /// Write a fragmented request to all connected peers.
     func sendRequest(_ data: Data) {
         let frags = BleFragmentation.fragment(encodeWirePayload(data))
         for (id, char) in requestChars {
-            guard let peripheral = peripherals[id] else { continue }
-            for frag in frags {
-                peripheral.writeValue(frag, for: char, type: .withoutResponse)
+            guard peripherals[id] != nil else { continue }
+            pendingWrites[id, default: []].append(contentsOf: frags.map { (frag: $0, char: char) })
+        }
+        drainPendingWrites()
+    }
+
+    private func drainPendingWrites() {
+        for (id, writes) in pendingWrites {
+            guard let peripheral = peripherals[id], !writes.isEmpty else { continue }
+            var remaining = writes
+            while !remaining.isEmpty {
+                let entry = remaining[0]
+                guard peripheral.canSendWriteWithoutResponse else { break }
+                peripheral.writeValue(entry.frag, for: entry.char, type: .withoutResponse)
+                remaining.removeFirst()
             }
+            pendingWrites[id] = remaining.isEmpty ? nil : remaining
         }
     }
 
@@ -96,19 +121,41 @@ extension FernlinkCentralManager: CBCentralManagerDelegate {
         peripherals.removeValue(forKey: peripheral.identifier)
         requestChars.removeValue(forKey: peripheral.identifier)
         reassemblers.removeValue(forKey: peripheral.identifier)
+        pendingWrites.removeValue(forKey: peripheral.identifier)
+        // Re-scan so we rediscover and reconnect after a drop.
+        startScanning()
+    }
+
+    func centralManager(_ central: CBCentralManager,
+                        didFailToConnect peripheral: CBPeripheral, error: Error?) {
+        // Remove from peripherals so the next scan result for this device triggers a fresh
+        // connect attempt. Without this, the device is stuck as "connecting" indefinitely.
+        peripherals.removeValue(forKey: peripheral.identifier)
+        startScanning()
     }
 }
 
 extension FernlinkCentralManager: CBPeripheralDelegate {
 
     func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
+        if error != nil {
+            manager.cancelPeripheralConnection(peripheral)
+            return
+        }
         guard let service = peripheral.services?.first(where: { $0.uuid == BleUuids.fernlinkService })
-        else { return }
+        else {
+            manager.cancelPeripheralConnection(peripheral)
+            return
+        }
         peripheral.discoverCharacteristics([BleUuids.charRequest, BleUuids.charProof], for: service)
     }
 
     func peripheral(_ peripheral: CBPeripheral,
                     didDiscoverCharacteristicsFor service: CBService, error: Error?) {
+        if error != nil {
+            manager.cancelPeripheralConnection(peripheral)
+            return
+        }
         guard let chars = service.characteristics else { return }
         var reqChar: CBCharacteristic?
         for char in chars {
@@ -122,6 +169,10 @@ extension FernlinkCentralManager: CBPeripheralDelegate {
             reassemblers[peripheral.identifier] = BleFragmentation.Reassembler()
             drainStoreTo(peripheral, requestChar: reqChar)
         }
+    }
+
+    func peripheralIsReady(toSendWriteWithoutResponse peripheral: CBPeripheral) {
+        drainPendingWrites()
     }
 
     func peripheral(_ peripheral: CBPeripheral,

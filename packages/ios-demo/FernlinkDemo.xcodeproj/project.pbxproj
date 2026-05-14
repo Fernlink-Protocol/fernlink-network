@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		FC1D2E3F4A5B6C7D8E9F0A1B /* FernlinkDemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB7C8D9E0F1A2B3C4D5E6F7A /* FernlinkDemoApp.swift */; };
 		FC2D3E4F5A6B7C8D9E0F1A2B /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB8C9D0E1F2A3B4C5D6E7F8A /* ContentView.swift */; };
-		FC3D4E5F6A7B8C9E0F1A2B3C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FB9C0D1E2F3A4B5C6D7E8F9A /* Assets.xcassets */; };
 		FD1A2B3C4D5E6F7A8B9C0D1E /* DemoViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD0A2B3C4D5E6F7A8B9C0D1E /* DemoViewModel.swift */; };
 		GE01B2C3D4E5F6A7B8C9D0E1 /* BleUuids.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE01B2C3D4E5F6A7B8C9D0E1 /* BleUuids.swift */; };
 		GE02B2C3D4E5F6A7B8C9D0E1 /* CentralManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE02B2C3D4E5F6A7B8C9D0E1 /* CentralManager.swift */; };
@@ -39,23 +38,23 @@
 		FB9C0D1E2F3A4B5C6D7E8F9A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		FC0D1E2F3A4B5C6D7E8F9A0B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FD0A2B3C4D5E6F7A8B9C0D1E /* DemoViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoViewModel.swift; sourceTree = "<group>"; };
-		FE01B2C3D4E5F6A7B8C9D0E1 /* BleUuids.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BleUuids.swift; path = "../ios/Sources/FernlinkSDK/BleUuids.swift"; sourceTree = "<group>"; };
-		FE02B2C3D4E5F6A7B8C9D0E1 /* CentralManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CentralManager.swift; path = "../ios/Sources/FernlinkSDK/CentralManager.swift"; sourceTree = "<group>"; };
-		FE03B2C3D4E5F6A7B8C9D0E1 /* Compression.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Compression.swift; path = "../ios/Sources/FernlinkSDK/Compression.swift"; sourceTree = "<group>"; };
-		FE04B2C3D4E5F6A7B8C9D0E1 /* Crypto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Crypto.swift; path = "../ios/Sources/FernlinkSDK/Crypto.swift"; sourceTree = "<group>"; };
-		FE05B2C3D4E5F6A7B8C9D0E1 /* FernlinkClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FernlinkClient.swift; path = "../ios/Sources/FernlinkSDK/FernlinkClient.swift"; sourceTree = "<group>"; };
-		FE06B2C3D4E5F6A7B8C9D0E1 /* Fragmentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Fragmentation.swift; path = "../ios/Sources/FernlinkSDK/Fragmentation.swift"; sourceTree = "<group>"; };
-		FE07B2C3D4E5F6A7B8C9D0E1 /* MessageRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MessageRouter.swift; path = "../ios/Sources/FernlinkSDK/MessageRouter.swift"; sourceTree = "<group>"; };
-		FE08B2C3D4E5F6A7B8C9D0E1 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Models.swift; path = "../ios/Sources/FernlinkSDK/Models.swift"; sourceTree = "<group>"; };
-		FE09B2C3D4E5F6A7B8C9D0E1 /* NfcBootstrapReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NfcBootstrapReader.swift; path = "../ios/Sources/FernlinkSDK/nfc/NfcBootstrapReader.swift"; sourceTree = "<group>"; };
-		FE10B2C3D4E5F6A7B8C9D0E1 /* PeripheralManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PeripheralManager.swift; path = "../ios/Sources/FernlinkSDK/PeripheralManager.swift"; sourceTree = "<group>"; };
-		FE11B2C3D4E5F6A7B8C9D0E1 /* ProofStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ProofStore.swift; path = "../ios/Sources/FernlinkSDK/ProofStore.swift"; sourceTree = "<group>"; };
-		FE12B2C3D4E5F6A7B8C9D0E1 /* SolanaRpc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SolanaRpc.swift; path = "../ios/Sources/FernlinkSDK/SolanaRpc.swift"; sourceTree = "<group>"; };
-		FE13B2C3D4E5F6A7B8C9D0E1 /* BleTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BleTransport.swift; path = "../ios/Sources/FernlinkSDK/transport/BleTransport.swift"; sourceTree = "<group>"; };
-		FE14B2C3D4E5F6A7B8C9D0E1 /* FernlinkTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FernlinkTransport.swift; path = "../ios/Sources/FernlinkSDK/transport/FernlinkTransport.swift"; sourceTree = "<group>"; };
-		FE15B2C3D4E5F6A7B8C9D0E1 /* MultipeerTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MultipeerTransport.swift; path = "../ios/Sources/FernlinkSDK/transport/MultipeerTransport.swift"; sourceTree = "<group>"; };
-		FE16B2C3D4E5F6A7B8C9D0E1 /* TransportManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TransportManager.swift; path = "../ios/Sources/FernlinkSDK/transport/TransportManager.swift"; sourceTree = "<group>"; };
-		FE17B2C3D4E5F6A7B8C9D0E1 /* TransportMessageRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TransportMessageRouter.swift; path = "../ios/Sources/FernlinkSDK/transport/TransportMessageRouter.swift"; sourceTree = "<group>"; };
+		FE01B2C3D4E5F6A7B8C9D0E1 /* BleUuids.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BleUuids.swift; path = ../ios/Sources/FernlinkSDK/BleUuids.swift; sourceTree = "<group>"; };
+		FE02B2C3D4E5F6A7B8C9D0E1 /* CentralManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CentralManager.swift; path = ../ios/Sources/FernlinkSDK/CentralManager.swift; sourceTree = "<group>"; };
+		FE03B2C3D4E5F6A7B8C9D0E1 /* Compression.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Compression.swift; path = ../ios/Sources/FernlinkSDK/Compression.swift; sourceTree = "<group>"; };
+		FE04B2C3D4E5F6A7B8C9D0E1 /* Crypto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Crypto.swift; path = ../ios/Sources/FernlinkSDK/Crypto.swift; sourceTree = "<group>"; };
+		FE05B2C3D4E5F6A7B8C9D0E1 /* FernlinkClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FernlinkClient.swift; path = ../ios/Sources/FernlinkSDK/FernlinkClient.swift; sourceTree = "<group>"; };
+		FE06B2C3D4E5F6A7B8C9D0E1 /* Fragmentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Fragmentation.swift; path = ../ios/Sources/FernlinkSDK/Fragmentation.swift; sourceTree = "<group>"; };
+		FE07B2C3D4E5F6A7B8C9D0E1 /* MessageRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MessageRouter.swift; path = ../ios/Sources/FernlinkSDK/MessageRouter.swift; sourceTree = "<group>"; };
+		FE08B2C3D4E5F6A7B8C9D0E1 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Models.swift; path = ../ios/Sources/FernlinkSDK/Models.swift; sourceTree = "<group>"; };
+		FE09B2C3D4E5F6A7B8C9D0E1 /* NfcBootstrapReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NfcBootstrapReader.swift; path = ../ios/Sources/FernlinkSDK/nfc/NfcBootstrapReader.swift; sourceTree = "<group>"; };
+		FE10B2C3D4E5F6A7B8C9D0E1 /* PeripheralManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PeripheralManager.swift; path = ../ios/Sources/FernlinkSDK/PeripheralManager.swift; sourceTree = "<group>"; };
+		FE11B2C3D4E5F6A7B8C9D0E1 /* ProofStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ProofStore.swift; path = ../ios/Sources/FernlinkSDK/ProofStore.swift; sourceTree = "<group>"; };
+		FE12B2C3D4E5F6A7B8C9D0E1 /* SolanaRpc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SolanaRpc.swift; path = ../ios/Sources/FernlinkSDK/SolanaRpc.swift; sourceTree = "<group>"; };
+		FE13B2C3D4E5F6A7B8C9D0E1 /* BleTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BleTransport.swift; path = ../ios/Sources/FernlinkSDK/transport/BleTransport.swift; sourceTree = "<group>"; };
+		FE14B2C3D4E5F6A7B8C9D0E1 /* FernlinkTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FernlinkTransport.swift; path = ../ios/Sources/FernlinkSDK/transport/FernlinkTransport.swift; sourceTree = "<group>"; };
+		FE15B2C3D4E5F6A7B8C9D0E1 /* MultipeerTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MultipeerTransport.swift; path = ../ios/Sources/FernlinkSDK/transport/MultipeerTransport.swift; sourceTree = "<group>"; };
+		FE16B2C3D4E5F6A7B8C9D0E1 /* TransportManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TransportManager.swift; path = ../ios/Sources/FernlinkSDK/transport/TransportManager.swift; sourceTree = "<group>"; };
+		FE17B2C3D4E5F6A7B8C9D0E1 /* TransportMessageRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TransportMessageRouter.swift; path = ../ios/Sources/FernlinkSDK/transport/TransportMessageRouter.swift; sourceTree = "<group>"; };
 		HE01B2C3D4E5F6A7B8C9D0E1 /* CoreBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreBluetooth.framework; path = System/Library/Frameworks/CoreBluetooth.framework; sourceTree = SDKROOT; };
 		HE02B2C3D4E5F6A7B8C9D0E1 /* MultipeerConnectivity.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MultipeerConnectivity.framework; path = System/Library/Frameworks/MultipeerConnectivity.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
@@ -312,7 +311,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = Y5B85DQZT2;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = FernlinkDemo/Info.plist;
 				INFOPLIST_PREPROCESS = YES;
@@ -335,7 +334,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = Y5B85DQZT2;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = FernlinkDemo/Info.plist;
 				INFOPLIST_PREPROCESS = YES;
@@ -375,7 +374,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
 	};
 	rootObject = FA1B2C3D4E5F6A7B8C9D0E1F /* Project object */;
 }

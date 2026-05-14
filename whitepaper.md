@@ -2,7 +2,7 @@
 
 ## Abstract
 
-Fernlink is a decentralized peer-to-peer protocol for distributing Solana transaction verification proofs across local networks using Bluetooth Low Energy (BLE), Wi-Fi/TCP, and NFC. Inspired by ferns that spread through both airborne spores and underground rhizomes, Fernlink enables nearby devices to collaboratively verify transaction status without relying on centralized RPC infrastructure. When a user submits a transaction to Solana, peers with better connectivity retrieve the transaction status and propagate cryptographically signed Ed25519 proofs back through the mesh network. Proofs are compressed using negotiable LZ4 or zstd codecs before transmission. Devices that cannot immediately reach a peer queue requests locally and drain the queue automatically on reconnection. This approach reduces RPC load, enables verification in low-bandwidth and offline environments, and creates a resilient public good for the Solana ecosystem.
+Fernlink is a decentralized peer-to-peer protocol for distributing Solana transaction verification proofs across local networks using Bluetooth Low Energy (BLE), Wi-Fi/TCP, and NFC. Inspired by ferns that spread through both airborne spores and underground rhizomes, Fernlink enables nearby devices to collaboratively verify transaction status without relying on centralized RPC infrastructure. When a user submits a transaction to Solana, peers with better connectivity retrieve the transaction status and propagate cryptographically signed Ed25519 proofs back through the mesh network. Proofs are transmitted with a negotiable compression codec (LZ4 or zstd); the default is uncompressed for cross-platform compatibility. Devices that cannot immediately reach a peer queue requests locally and drain the queue automatically on reconnection. This approach reduces RPC load, enables verification in low-bandwidth and offline environments, and creates a resilient public good for the Solana ecosystem.
 
 ## Table of Contents
 
@@ -206,7 +206,7 @@ The first byte of every wire message is the codec identifier:
 
 ### 6.2 Codec Negotiation
 
-Peers advertise supported codecs in the BLE STATUS characteristic and in TCP handshake metadata. The sending peer selects the highest-throughput codec mutually supported. If no negotiation has occurred, senders default to `0x01` (LZ4). Receivers that do not recognise a codec byte fall back to treating the payload as uncompressed.
+Peers advertise supported codecs in the BLE STATUS characteristic and in TCP handshake metadata. The sending peer selects the highest-throughput codec mutually supported. If no negotiation has occurred, senders default to `0x00` (None / uncompressed). Receivers that do not recognise a codec byte fall back to treating the payload as uncompressed.
 
 ### 6.3 Backwards Compatibility
 
@@ -220,7 +220,7 @@ LZ4-compressed payloads prepend a 4-byte little-endian original length:
 [ original_len: u32 LE ] [ lz4_block_data ]
 ```
 
-This is required for cross-language compatibility: Rust (`lz4_flex`), TypeScript (`lz4js`), Android (`lz4-java`), and iOS (`Compression.framework`) all require the uncompressed size for block decompression.
+This format is used by Rust (`lz4_flex`) and TypeScript (`lz4js`). **Note:** Apple's `Compression.framework` (`COMPRESSION_LZ4`) produces a proprietary streaming format that is not compatible with this block layout. Android uses the Rust FFI (`lz4_flex`) and is therefore compatible with the TypeScript peer. Cross-platform LZ4 between Apple and non-Apple implementations is not supported; for iOS↔Android deployments use `0x00` (None) or `0x02` (zstd/LZFSE) instead.
 
 ---
 

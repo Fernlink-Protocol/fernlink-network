@@ -2,14 +2,17 @@ import Foundation
 
 // 2-byte header [index: UInt8, total: UInt8] — identical to Android, Rust, and TypeScript layers.
 enum BleFragmentation {
-    private static let headerSize = 2
-    private static let maxPayload = BleUuids.mtu - headerSize
+    static let headerSize = 2
 
-    static func fragment(_ data: Data) -> [Data] {
+    /// Fragment data into MTU-sized chunks.
+    /// - Parameter fragmentSize: total bytes per fragment including the 2-byte header.
+    ///   Defaults to BleUuids.mtu (512). Pass central.maximumUpdateValueLength for notifications.
+    static func fragment(_ data: Data, fragmentSize: Int = BleUuids.mtu) -> [Data] {
+        let chunkSize = max(1, fragmentSize - headerSize)
         var chunks: [Data] = []
         var offset = 0
         while offset < data.count {
-            let end = min(offset + maxPayload, data.count)
+            let end = min(offset + chunkSize, data.count)
             chunks.append(data[offset ..< end])
             offset = end
         }
