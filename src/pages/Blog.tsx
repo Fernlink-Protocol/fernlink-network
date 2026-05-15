@@ -55,7 +55,13 @@ export default function Blog() {
       {/* Post list */}
       <section className="py-16">
         <div className="space-y-6">
-          {posts.map((post) => {
+          {[...posts]
+            .sort((a, b) => {
+              if (a.status !== b.status) return a.status === "published" ? -1 : 1;
+              if (a.status === "published") return b.date.localeCompare(a.date);
+              return a.date.localeCompare(b.date);
+            })
+            .map((post) => {
             const card = (
               <div className={`bg-black border p-8 terminal-border transition-all duration-300 ${
                 post.status === "published"
