@@ -10,12 +10,12 @@ const posts = [
     status:  "published",
   },
   {
-    slug:    null,
+    slug:    "/blog/multi-transport",
     date:    "2026-05-15",
     title:   "Multi-Transport Fernlink: BLE, WiFi/TCP, and NFC Working Together",
     excerpt: "A deep-dive into the multi-transport architecture: how BLE, WiFi/TCP with mDNS peer discovery, and NFC bootstrapping each solve a different part of the connectivity problem, and how TransportManager coordinates them under a single API across Android, iOS, TypeScript, and Rust desktop.",
     tags:    ["ARCHITECTURE", "ANDROID", "IOS"],
-    status:  "upcoming",
+    status:  "published",
   },
   {
     slug:    null,

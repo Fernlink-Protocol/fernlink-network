@@ -13,6 +13,7 @@ import Contact from "./pages/Contact";
 import Roadmap from "./pages/Roadmap";
 import Blog from "./pages/Blog";
 import IntroducingFernlink from "./pages/blog/IntroducingFernlink";
+import MultiTransport from "./pages/blog/MultiTransport";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/roadmap" element={<Roadmap />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/introducing-fernlink" element={<IntroducingFernlink />} />
+            <Route path="/blog/multi-transport" element={<MultiTransport />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Layout>
