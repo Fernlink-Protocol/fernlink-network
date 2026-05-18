@@ -2,34 +2,96 @@
 
 ---
 
+## Competitive Reference: Pollinet (@sol_pollinet)
+
+Pollinet is the closest comparable project on Solana Twitter — same problem space
+(offline/mesh verification), similar technical depth, Solana Foundation grant-backed.
+Their profile as of May 2026:
+
+- Display name: **Pollinet | Solana Resilience Layer**
+- Bio: "We power wallets, dApps, and Fintech platforms to process transactions even without internet access. Backed by @SolanaFndn grant."
+- Header tagline: "Power blockchain to work even when the internet isn't"
+- 1,021 followers after ~10 months active (joined July 2025)
+- Following 50 accounts (selective)
+- 423 posts total (~1.3/day average)
+- Blue checkmark (X Premium)
+
+**What Pollinet does well:**
+- Benefit-first bio. It opens with what users get, not how the tech works.
+- Subtitle in the display name gives instant context without reading the bio.
+- Header tagline is punchy and accessible to non-technical audience.
+- They lean hard into the Solana Foundation grant as credibility.
+
+**Where Fernlink differentiates:**
+- Fernlink was *rejected* for that grant and kept building anyway. That is a more
+  compelling story than being backed. Lead with the work, not the endorsement.
+- Fernlink is multi-platform in a way Pollinet is not: Android, iOS, TypeScript, Rust
+  desktop, browser WebBluetooth. That breadth is worth highlighting.
+- Fernlink is closer to protocol infrastructure than an app-layer service.
+  The framing should be "Solana's verification mesh" not "we power your dApp."
+- Fernlink's bio should be slightly more technical. The target audience is builders
+  first, not Fintech platforms.
+
+---
+
 ## Profile
 
 | Field | Value |
 |---|---|
 | **Handle** | `@fernlink_sol` |
-| **Display name** | Fernlink |
-| **Bio** | Decentralized Solana verification over BLE · WiFi · NFC. One RPC call shared across the mesh. Open source, Apache 2.0. Built on Solana. |
+| **Display name** | `Fernlink \| Solana Verification Mesh` |
+| **Bio** | Peer-to-peer Solana tx verification over BLE, WiFi, and NFC. One RPC call, shared across the mesh. Android · iOS · TypeScript · Rust. Apache 2.0. |
+| **Category** | Technology Company |
 | **Website** | https://fernlink.vercel.app |
 | **Location** | Solana |
 | **Joined** | May 2026 |
 
+> Bio is 159 characters — fits within X's 160-character limit.
+
 ### Profile image
 Minimal square: the Fernlink wordmark or `[fern]` logotype in `#22C55E` on black.
-No gradients, no orbs, no generic Solana blue. Stand out from the noise.
+No gradients, no orbs, no generic Solana blue. The green-on-black is distinctive
+in a feed full of purple, blue, and gradient logos.
 
 ### Header image (1500×500)
-Black background. A sparse node graph in `#22C55E` — dots connected by thin lines,
-one central node slightly brighter. No text beyond the URL at bottom right.
-Looks like a mesh. Is a mesh.
+Dark background (not pure black — slightly off-black like `#0a0a0a`).
+A faint node graph across the full width in `#22C55E` at low opacity.
+On top, large centered text in bright `#22C55E`:
+
+> **Verify Solana transactions without touching an RPC.**
+
+Smaller subtext below:
+> BLE · WiFi · NFC · Open Source
+
+URL at bottom right: `fernlink.vercel.app`
+
+This is a direct answer to Pollinet's "Power blockchain to work even when the internet isn't."
+Ours is more specific to the verification problem and speaks to developers immediately.
 
 ### Pinned tweet (update each major milestone)
-> We built a peer-to-peer mesh for Solana verification.  
-> BLE · WiFi · NFC. Android · iOS · TypeScript · Rust.  
-> One device verifies a transaction. The signed proof propagates to the mesh.  
-> Nearby devices never hit the RPC.  
+> Every wallet, every dApp, every POS terminal makes its own RPC call to confirm a transaction.  
+> Same call. Same providers. Same single point of failure. Over and over.  
 >  
-> Open source. Apache 2.0.  
-> github.com/OnoseAnthony/fernlink-network
+> We built the fix.  
+>  
+> Fernlink: a peer-to-peer verification mesh over BLE, WiFi, and NFC.  
+> One device hits the RPC. The signed proof propagates. Nearby devices never ask again.  
+>  
+> Android · iOS · TypeScript · Rust. Apache 2.0.  
+> [link to GitHub]
+
+---
+
+> Note on the grant:  
+> @sol_pollinet leads their bio with "Backed by @SolanaFndn grant."  
+> We were rejected. Do not hide it — weaponize it.  
+> When the moment is right (around week 3–4), post this:  
+>  
+> "The Solana Foundation rejected our grant application in February.  
+> We shipped anyway: Android SDK, iOS SDK, TypeScript SDK, Rust core, BLE mesh, WiFi Direct, NFC bootstrap, wire compression, cross-transport relay.  
+> We are applying again. The code is the application."  
+>  
+> This will outperform any polished announcement tweet.
 
 ---
 
