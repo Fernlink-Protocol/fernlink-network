@@ -1,7 +1,8 @@
-# Fernlink — Written Tweet Content
+# Fernlink — Tweet Content
 
-All tweets are ready to post. Threads are numbered per tweet.
-Media notes are in [brackets]. Post times: 9am or 6pm UTC.
+The rule for every tweet: if you can imagine another project posting the same words,
+delete it and start over. Every tweet must be specific to what we actually built,
+what we actually hit, or what we actually believe.
 
 ---
 
@@ -9,93 +10,86 @@ Media notes are in [brackets]. Post times: 9am or 6pm UTC.
 
 ---
 
-### DAY 1 — Launch thread (9am UTC)
+### DAY 1 — Launch (pin this)
 
-**Tweet 1 of 9 — Hook (pin this)**
+**Hook tweet**
 ```
-Solana has a centralized verification problem.
+Solana's verification layer is three companies.
 
-Every wallet. Every dApp. Every POS terminal. All hammering the same handful of RPC endpoints to confirm the same transactions.
+Not three protocols. Three companies — with SLAs, rate limits, and engineering teams that go home at night.
 
-We built a mesh to fix it.
+Every wallet. Every dApp. Every POS terminal. All of them dependent on the same small set of servers to confirm whether a transaction happened.
 
-Thread. 🧵
-```
-
-**Tweet 2 of 9**
-```
-The problem is architectural, not operational.
-
-When three providers handle the majority of Solana's confirmation traffic, every outage is a network-wide event. Every rate limit hits everyone simultaneously. There's no redundancy — just the appearance of it.
+We built a mesh to route around it. Thread. 🧵
 ```
 
-**Tweet 3 of 9**
+**2/**
+```
+The way verification works today:
+
+Device needs to know if a transaction confirmed.
+Device calls an RPC endpoint.
+RPC endpoint calls the Solana validator network.
+RPC endpoint responds.
+
+Now imagine 10,000 devices at a conference asking the same question about the same set of transactions, all hitting the same endpoint. That's not a scaling problem. That's a design problem.
+```
+
+**3/**
 ```
 Fernlink routes verification through the devices already in the room.
 
-One phone hits the RPC, signs the result with its Ed25519 key, and broadcasts the proof over BLE. Nearby devices skip the call entirely.
+One phone hits the RPC. Signs the result with its Ed25519 key. Broadcasts the proof over BLE.
 
-The proof is cryptographically signed. A peer can't lie about what the RPC returned.
+Every nearby device that receives that proof skips the call entirely.
+
+The RPC still exists. It just serves one request instead of ten thousand.
 ```
 
-**Tweet 4 of 9**
+**4/**
 ```
-Multi-proof consensus means one compromised peer can't settle a transaction.
+The security property that makes this work:
 
-Default threshold: 2 independent verifiers must agree before a result is accepted. UUID deduplication with TTL prevents replay. The same proof can't be counted twice.
-```
+A peer can't lie about what the RPC returned.
 
-**Tweet 5 of 9**
-```
-Three phases:
-
-REQUEST — a device broadcasts a signed verification request over the mesh.
-VERIFY — a peer with RPC access checks the transaction, signs the result.
-PROPAGATE — the proof gossips outward. Each hop is tracked. TTL limits the spread.
+The proof is Ed25519 signed by the verifying node. Anyone can check the signature. And consensus requires 2+ independent verifiers to agree before a result is accepted — one compromised peer can't settle a transaction alone.
 ```
 
-**Tweet 6 of 9**
+**5/**
 ```
-Four platforms. One protocol.
+Three transports. Each solves a different problem.
 
-Android (Kotlin + Rust JNI)
-iOS (Swift + CoreBluetooth + CryptoKit)
-TypeScript (Node.js + browser WebBluetooth)
+BLE — works between any two devices, across Android and iOS, no setup.
+WiFi Direct / Multipeer Connectivity — 10–40 Mbps when you need to move data fast.
+NFC — tap two devices together, connection established in 200ms, no scan cycle.
+
+All three run simultaneously. The fastest available path wins.
+```
+
+**6/**
+```
+Four platforms. One wire format.
+
+Android (Kotlin + Rust core via JNI)
+iOS (Swift + CryptoKit)
+TypeScript (Node.js + browser)
 Rust desktop (BLE + WiFi simultaneously)
 
-An Android device verifies a proof signed by an iPhone. No translation layer.
+An Android device verifies a proof signed by an iPhone. The signature check passes.
+No translation layer, no format negotiation. The protocol handles it.
 ```
 
-**Tweet 7 of 9**
-```
-Three transports.
-
-BLE — universal, cross-platform, battery-conscious.
-WiFi Direct / Multipeer Connectivity — high-throughput local links, 10–40 Mbps.
-NFC — tap-to-pair bootstrap in ~200ms, bypasses the scan cycle entirely.
-
-All three active simultaneously. TransportManager picks the best available path.
-```
-
-**Tweet 8 of 9**
-```
-The numbers: 60–80% fewer RPC calls in a dense environment.
-
-A conference hall. A market. A city block. One device verifies. The signed proof reaches dozens of nearby devices. Each one that receives it never asks the RPC.
-```
-
-**Tweet 9 of 9**
+**7/**
 ```
 Open source. Apache 2.0.
 
-No VC round. No presale. No token (yet). Just the code.
+No VC round. No presale. No token yet. Just the protocol.
 
-Run the devnet demo — three simulated peers, a real SOL transfer, signed proofs, consensus result — with no hardware:
+Run the devnet demo — three simulated peers, a real SOL transfer, signed proofs, consensus — with no hardware:
 
 $ npx fernlink-demo
 
-Whitepaper: fernlink.vercel.app
-GitHub: github.com/OnoseAnthony/fernlink-network
+Whitepaper and source at fernlink.vercel.app
 ```
 
 ---
@@ -103,47 +97,42 @@ GitHub: github.com/OnoseAnthony/fernlink-network
 ### DAY 3 — Demo (6pm UTC)
 
 ```
-Run this.
-
 $ npx fernlink-demo
 
-It spins up three simulated mesh peers, sends a real SOL transfer on devnet, routes the verification request through the peer mesh, and prints every signed Ed25519 proof alongside the final consensus result.
+Three simulated peers. Real devnet transaction. Verification request routed through the mesh. Signed proofs. Consensus result. Printed to your terminal.
 
-No hardware. No API keys. No setup.
+No BLE hardware. No setup. No account.
 
-[attach: terminal screen recording of the demo output]
+[screen recording]
 ```
 
 ---
 
-### DAY 5 — Problem framing (9am UTC)
+### DAY 5 — The real take (9am UTC)
 
 ```
-The Solana RPC market looks competitive. Helius, QuickNode, Triton, a handful of others.
+The Solana RPC market looks competitive.
 
-It isn't. When one provider goes down, every application using them goes down simultaneously. The ecosystem doesn't have redundancy — it has the illusion of it.
+It isn't.
 
-The correct fix isn't a better RPC provider. It's not needing one for every device.
+When a major provider has an incident, every application using them degrades at exactly the same moment. The ecosystem has the aesthetic of redundancy — multiple providers, multiple endpoints — without the substance of it.
+
+The correct fix isn't a better RPC provider. It's not treating confirmation as a problem each device must solve alone.
 ```
 
 ---
 
-### DAY 7 — First week numbers (6pm UTC)
+### DAY 7 — One week (6pm UTC)
 
 ```
-One week since we open sourced Fernlink.
+One week open source.
 
 [X] stars. [Y] forks. [Z] unique clones.
 
-The repo has:
-— 7 Rust unit tests in fernlink-core
-— Full TypeScript SDK coverage
-— 6 instrumented Android JNI tests
-— 8 BLE simulator tests, running in CI with no physical hardware
+The repo has 7 Rust unit tests, a TypeScript SDK with full coverage, 6 instrumented Android JNI tests, and a BLE simulator that runs in CI with no physical hardware.
 
-Code first. Hype later.
-
-github.com/OnoseAnthony/fernlink-network
+The number that matters most isn't any of those.
+It's how many people ran npx fernlink-demo and saw the proofs come back.
 ```
 
 ---
@@ -152,79 +141,65 @@ github.com/OnoseAnthony/fernlink-network
 
 ---
 
-### DAY 9 — BLE fragmentation thread (9am UTC)
+### DAY 9 — BLE thread (9am UTC)
 
-**Tweet 1 of 9 — Hook**
+**1/**
 ```
-BLE feels simple. Characteristics, notifications, a couple of UUIDs.
+We spent three days debugging why BLE notifications were disappearing on mid-range Android devices.
 
-Here's what it actually takes to send a 200-byte signed proof reliably across the ATT layer without losing data.
+The ATT MTU negotiated fine. The code looked right. Data just wasn't arriving.
+
+Here's what was actually happening — and what it taught us about building reliable BLE infrastructure.
 
 Thread. 🧵
 ```
 
-**Tweet 2 of 9**
+**2/**
 ```
-The ATT protocol has two ways to push data to a subscribed central: NOTIFY and INDICATE.
+BLE has two ways to push data to a subscribed device: NOTIFY and INDICATE.
 
-NOTIFY is fire-and-forget. The server sends the packet. Whether it arrived is not confirmed at the ATT layer. You find out when the data is wrong.
+NOTIFY: the server sends the packet and moves on. Whether it arrived is your problem.
 
-INDICATE waits.
-```
+INDICATE: the client sends a confirmation back before the server can send the next packet.
 
-**Tweet 3 of 9**
-```
-INDICATE sends ATT_HANDLE_VALUE_INDICATION. The client responds with ATT_HANDLE_VALUE_CONFIRM. Only then does the ATT layer consider the transaction complete.
-
-That confirmation is what triggers onNotificationSent on the Android GATT server. It's the only signal you have that the fragment was actually received.
+We started with NOTIFY. That was the mistake.
 ```
 
-**Tweet 4 of 9**
+**3/**
 ```
-We serialize every fragment send behind a CompletableDeferred<Unit>.
+The firmware on cheaper BLE chips has an undocumented limit on back-to-back notification payload size.
 
-Before writing fragment N, we park a deferred and wait for onNotificationSent to complete it. Fragment N+1 is never queued until N is confirmed delivered.
+Modern Pixel hardware negotiates an ATT MTU of 517 bytes — 514 bytes of usable payload. The firmware accepts it. Then quietly drops packets above a certain size when they arrive in rapid succession.
 
-It's the same pattern as a write queue — applied to the notification path.
-```
-
-**Tweet 5 of 9**
-```
-The MTU problem is more subtle.
-
-Android negotiates up to 517 bytes on modern Pixel hardware — 514 bytes of ATT payload. We tried using it. Some BLE controller firmware on mid-range devices drops back-to-back large notifications silently. No error. No callback. Data just disappears.
-
-We cap at 185 bytes regardless of what was negotiated.
+No error. No callback. The data just disappears.
 ```
 
-**Tweet 6 of 9**
+**4/**
 ```
-At 182 bytes of ATT payload per fragment, a 200-byte Fernlink proof assembles in two fragments.
+Switching to INDICATE fixed it.
 
-Small, reliable, boring. Exactly what you want from infrastructure code.
-```
+INDICATE is slower — there's a round-trip confirmation before each fragment. But the ATT layer guarantees delivery. Fragment N is confirmed before fragment N+1 is sent. Silent drops become impossible.
 
-**Tweet 7 of 9**
-```
-iOS adds MAC address rotation.
-
-Every ~15 minutes, iOS rotates the BLE address of each peripheral. From the Android server side, a subscribed device vanishes. The old address stays in subscribedDevices. The next notification hangs waiting for a callback that will never fire.
+We also capped fragment size at 185 bytes regardless of negotiated MTU. Small, boring, reliable.
 ```
 
-**Tweet 8 of 9**
+**5/**
 ```
-We detect stale subscribers with a 2-second withTimeoutOrNull on each fragment.
+Then iOS threw a different problem at us.
 
-If onNotificationSent doesn't fire, the subscriber is evicted and the send moves on. That 2-second timeout is the only reason notification delivery doesn't stall indefinitely when an iOS device rotates its MAC.
+iOS rotates the BLE MAC address of each peripheral roughly every 15 minutes, to prevent tracking. From the Android server's perspective, a subscribed device vanishes. The old address stays in the subscriber list. Notifications to it hang forever.
+
+We detect it with a 2-second timeout per fragment. No callback in 2 seconds: the subscriber is stale, evict it.
 ```
 
-**Tweet 9 of 9**
+**6/**
 ```
 The fragmentation header is two bytes: [index, total].
 
-That's the whole scheme. INDICATE gives you the delivery guarantee. The reassembler handles ordering. The same two bytes run identically in Kotlin, Swift, TypeScript, and Rust.
+That's the whole scheme. INDICATE provides delivery. The reassembler provides ordering. Every fragment arrives confirmed before the next one is queued.
 
-Simple things are hard to build and easy to use. That's the goal.
+The same two bytes run identically in Kotlin, Swift, TypeScript, and Rust.
+Simple things took a long time to get right.
 ```
 
 ---
@@ -232,42 +207,46 @@ Simple things are hard to build and easy to use. That's the goal.
 ### DAY 11 — Cross-platform wire format (6pm UTC)
 
 ```
-Four platforms. One wire format.
+The hardest part of a cross-platform protocol isn't the cryptography.
 
-Rust (ed25519-dalek) · Kotlin (JNI to Rust core) · Swift (CryptoKit) · TypeScript (tweetnacl)
+It's getting four runtimes to agree on byte order.
 
-The signable bytes are identical everywhere:
-tx signature (UTF-8) + status byte + slot (u64 LE) + blockTime (u64 LE) + errorCode (u16 LE) + verifier pubkey (32 bytes)
+The Fernlink signable bytes:
+tx signature (UTF-8) + status byte (u8) + slot (u64 LE) + blockTime (u64 LE) + errorCode (u16 LE) + verifier pubkey (32 bytes)
 
-An Android device verifies a proof signed by an iPhone. No translation, no negotiation. The protocol handles it.
+Change one byte width on one platform — Swift to u32 instead of u64 for slot — and cross-platform verification fails silently. The signature is valid. The bytes are wrong. You have no idea until you test an Android verifying an iOS proof.
+
+We keep them in sync with cross-platform test vectors. Known input. Expected output. All four runtimes verify against the same vector set.
 ```
 
 ---
 
-### DAY 13 — Ecosystem take (9am UTC)
+### DAY 13 — Real take (9am UTC)
 
 ```
-Billions of people live where internet is intermittent.
+Financial access is a connectivity problem as much as a legal one.
 
-A Solana wallet that requires a live RPC call for every confirmation doesn't work for them. Not because of Solana — because of an architecture decision that was never questioned.
+A Solana wallet that requires a live RPC call for every confirmation is designed for users with reliable internet. That's not the market that needs financial infrastructure most.
 
-The mesh works differently. If someone nearby already verified a transaction, you receive their signed cryptographic proof without touching the internet. That's financial inclusion that works in the field.
+The mesh changes the assumption. If someone nearby already verified a transaction, you receive their signed proof without touching the internet. The verification is ambient. It follows the density of devices, not the density of cell towers.
 ```
 
 ---
 
-### DAY 14 — Week 2 recap (6pm UTC)
+### DAY 14 — Bug story (6pm UTC)
 
 ```
-Week 2 notes.
+We shipped a bug that silently dropped every verification request on freshly connected iOS peers.
 
-Shipped: improved iOS peer reconnect after MAC rotation. Fixed a connectedPeerCount race that was silently dropping writes on freshly discovered peripherals.
+The logic: if connectedPeerCount > 0, broadcast the request. Sensible.
 
-The bug was subtle. iOS reports a peripheral as discovered the moment didDiscover fires — before the connect → service discovery → CCC sequence completes (~500ms later). We were counting peripherals.count, which meant broadcastRequest() fired while requestChars was still empty. Writes went nowhere.
+The problem: iOS reports a peripheral as "discovered" the moment didDiscover fires. Not after connect. Not after service discovery. Not after the CCC descriptor write that actually enables notifications. Just — discovered.
 
-Fix: count requestChars.count instead.
+peripherals.count was 1. requestChars was empty. We wrote to a characteristic that didn't exist yet. The write returned no error. Nothing happened.
 
-Next week: Android foreground service deep dive, NFC bootstrap internals, WiFi Direct Group Owner election.
+Fix: count requestChars.count. Only peers with a confirmed request characteristic count as connected.
+
+Two days. One map. Shipped.
 ```
 
 ---
@@ -278,167 +257,136 @@ Next week: Android foreground service deep dive, NFC bootstrap internals, WiFi D
 
 ### DAY 15 — Android BLE service thread (9am UTC)
 
-**Tweet 1 of 8 — Hook**
+**1/**
 ```
-Running BLE as a persistent Android background service is a different problem from connecting in an Activity.
+Running BLE as a persistent Android background service is a fundamentally different problem from connecting from an Activity.
 
-Here's how FernlinkBleService works — GATT server, advertisement, foreground service lifecycle, and the one GATT characteristic property that makes fragmented delivery safe.
+The OS will kill a background process doing BLE work unless you explicitly tell it not to. Here's how FernlinkBleService stays alive and why the foreground service model is the only correct approach.
 
 Thread. 🧵
 ```
 
-**Tweet 2 of 8**
+**2/**
 ```
-Android 8+ requires foreground services for any background operation that needs consistent CPU time. BLE advertising and scanning qualify.
+Android 8 introduced background execution limits. Any app doing network or sensor work in the background without a foreground service gets killed during power-save events.
 
-FernlinkBleService extends Service, calls startForeground() immediately in onCreate(), and shows a persistent notification. Without it, the OS kills the process during BLE scan cycles.
-```
+BLE advertising and scanning — both of which Fernlink runs continuously — qualify. The fix is non-optional: call startForeground() in onCreate() with a notification the user can see.
 
-**Tweet 3 of 8**
-```
-The GATT profile has three characteristics:
-
-REQUEST — writable by centrals. Verification requests come in here.
-PROOF — indicatable. Signed proofs go out here. INDICATE, not NOTIFY.
-STATUS — readable. Returns a JSON blob: version, supported commitment levels, supported compression codecs.
+The notification isn't UX. It's the operating system requiring you to disclose what you're doing.
 ```
 
-**Tweet 4 of 8**
+**3/**
 ```
-The STATUS characteristic is how capability negotiation works.
+The GATT profile has three characteristics.
 
-Current value:
-{"version":2,"commitment":["confirmed","finalized"],"compression":["lz4","zstd"]}
+REQUEST — centrals write verification requests here.
+PROOF — the server notifies here with signed proofs. Uses INDICATE.
+STATUS — readable JSON: version, supported commitment levels, supported compression codecs.
 
-A connecting peer reads this before sending its first request. If it supports LZ4, it compresses. If not, it doesn't. The server handles both.
-```
-
-**Tweet 5 of 8**
-```
-Advertisement is split across two packets: primary (31 bytes) and scan response (31 bytes).
-
-The primary carries the Fernlink service UUID — so scanners filtering by UUID find us.
-The scan response carries an 8-byte pubkey fingerprint as manufacturer-specific data.
-
-Active scanners receive both. The fingerprint lets us recognize a peer across MAC rotations.
+STATUS is how capability negotiation works. A peer reads it before sending its first request. If it sees "lz4" in the compression list, it compresses. If not, it doesn't. No separate handshake.
 ```
 
-**Tweet 6 of 8**
+**4/**
 ```
-The fingerprint matters because iOS rotates MAC addresses every ~15 minutes.
+Advertisement is split across two BLE packets: primary (31 bytes) and scan response (31 bytes).
 
-When a rotation happens, the scan callback fires again for the same physical device with a new address. Without the fingerprint, we'd call connectGatt() a second time and try to hold two simultaneous connections to the same peer.
+Primary: Fernlink service UUID. Scanners filtering by UUID find us.
+Scan response: 8-byte pubkey fingerprint as manufacturer-specific data.
 
-With it, we skip the reconnect entirely.
+Active scanners receive both. The fingerprint is why we can recognize a peer across MAC rotations — same fingerprint, different address, same device. Skip the reconnect.
 ```
 
-**Tweet 7 of 8**
+**5/**
 ```
 On disconnect, we hold the fingerprint reservation for 10 seconds before allowing reconnect.
 
-Without that delay: disconnect fires, reservation clears, scan callback sees the device immediately, connectGatt() is called again within milliseconds. Repeat. The Android GATT interface pool exhausts itself.
+Without that delay: disconnect fires, reservation clears, the scan callback fires again within milliseconds, connectGatt() is called immediately. If the connection fails again — same loop. The Android GATT interface pool exhausts itself in under a minute.
 
-10 seconds is enough to let the stack settle.
-```
-
-**Tweet 8 of 8**
-```
-The GATT server and client run together in the same service — every device is both a peripheral (advertising, accepting writes) and a central (scanning, connecting to peers).
-
-When a request arrives on CHAR_REQUEST, the service router signs a proof and sends it back via CHAR_PROOF. The requesting device never needs to know it's talking to both halves of the same process.
+10 seconds is enough for the stack to settle. Entirely undocumented. Found empirically.
 ```
 
 ---
 
-### DAY 17 — iOS CoreBluetooth thread (6pm UTC)
+### DAY 17 — iOS thread (6pm UTC)
 
-**Tweet 1 of 6 — Hook**
+**1/**
 ```
-CoreBluetooth and Android BLE look similar on the surface.
+Five things CoreBluetooth does differently from Android BLE.
 
-They are not. Here are the four things that are actually different, and the two bugs that only manifest on iOS.
+Two of them are documented. Three of them we found by shipping broken code.
 
 Thread. 🧵
 ```
 
-**Tweet 2 of 6**
+**2/**
 ```
-Android 13 split onCharacteristicChanged into two overrides.
+Android 13 deprecated one onCharacteristicChanged override and added a new one that passes the value directly as a parameter.
 
-The old one reads from characteristic.value. The new one (API 33+) receives value as a direct parameter and ignores characteristic.value entirely.
+If you implement only the new one: pre-API-33 devices never deliver notifications.
+If you implement only the old one: API 33+ devices pass a stale or null byte array.
 
-Implement only the new one: pre-13 devices never deliver notifications.
-Implement only the old one: API 33+ devices deliver null.
-
-Both are required in the same class.
+Both overrides must exist in the same class. The platform calls whichever is appropriate for the OS version. The Kotlin compiler will not warn you.
 ```
 
-**Tweet 3 of 6**
+**3/**
 ```
-allowDuplicates: true is not optional on iOS if you care about reconnects.
+allowDuplicates: true.
 
-Without it, iOS delivers one scan result per device. If the connection fails, the device is never rediscovered — it stays in the peripheral map as "connecting" indefinitely.
+Without it, iOS delivers exactly one scan result per peripheral. If the first connection attempt fails, that device is never rediscovered. It sits in the peripheral map as "connecting" indefinitely.
 
-One flag. Took two days to find.
-```
-
-**Tweet 4 of 6**
-```
-iOS peripheral count is not the same as connected peer count.
-
-peripherals.count goes up when didDiscover fires. CHAR_REQUEST isn't available until after connect → service discovery → CCC — roughly 500ms later.
-
-We wrote to peripherals[id] with no request characteristic. Writes went nowhere. Count requestChars.count.
+One flag. We missed it for a week. Every failed connection on iOS was a permanent loss.
 ```
 
-**Tweet 5 of 6**
+**4/**
 ```
-iOS cannot emit NFC. No HCE, no workaround.
+peripherals.count is not connectedPeerCount.
 
-NFC bootstrap is one-directional: Android emits the NDEF record via Host Card Emulation, iPhone reads it via CoreNFC and calls connectDirect() to skip the scan cycle.
+iOS increments peripherals.count when didDiscover fires. The connect → service discovery → CCC write sequence takes another 300–800ms. During that window, broadcastRequest() will write to a characteristic that doesn't exist.
 
-iPhone → iPhone pairing doesn't need NFC. Multipeer Connectivity finds the peer and negotiates the session automatically.
+The write returns no error. The proof request goes nowhere.
+
+requestChars.count is the correct count. Only peers with a confirmed CHAR_REQUEST handle are actually ready.
 ```
 
-**Tweet 6 of 6**
+**5/**
 ```
-Multipeer Connectivity automatically selects the best available radio.
+iOS cannot emit NFC. No Host Card Emulation, no workaround.
 
-Same network: infrastructure WiFi. Different networks: peer-to-peer WiFi. Neither: Bluetooth.
+The bootstrap is one-directional: Android emits an NDEF record via HCE, iPhone reads it with CoreNFC, calls connectDirect(), skips the scan cycle.
 
-When two iPhones are on the same LAN, MCF negotiates over WiFi and BLE goes quiet. The application code doesn't change. The framework handles it.
-
-Apple solved the radio selection problem. We just plug into it.
+iPhone-to-iPhone doesn't need NFC. Multipeer Connectivity finds the peer automatically and negotiates the session. For Apple-to-Apple, the problem is already solved.
 ```
 
 ---
 
-### DAY 19 — NFC bootstrap (9am UTC)
+### DAY 19 — NFC (9am UTC)
 
 ```
-Tap two devices together.
+NFC is not a transport.
 
-NFC bootstrap exchanges credentials in the field interaction itself — before either device has run a BLE scan cycle. The receiving device calls connectDirect() with the peer's known BLE address and skips the scan entirely.
+We tried to think of it as one early on. Small payloads, terrible range, no background operation on iOS. Completely wrong mental model.
 
-~200ms from tap to connected peer. A normal BLE scan takes 5–8 seconds.
+NFC is a bootstrap. Its job is to exchange enough information in a single tap that BLE can take over without a scan cycle.
 
-The NDEF record carries three things: the peer's Ed25519 public key, the Fernlink service UUID, and the current BLE MAC address. Compact enough to transfer in a single NFC field interaction.
+The NDEF record carries three things: Ed25519 public key, Fernlink service UUID, BLE MAC address. Under a hundred bytes. Transfers in the field interaction itself, before the user has pulled the devices apart.
 
-Works Android → iPhone. For iPhone → iPhone, Multipeer Connectivity handles discovery automatically — no tap required.
+The receiving device calls connectDirect() with the MAC address it just received. No scan. No discovery timeout. Connection in ~200ms.
+
+That's the whole protocol. It exists so the slow part never happens.
 ```
 
 ---
 
-### DAY 21 — Grant rejection (9am UTC)
+### DAY 21 — Grant tweet (9am UTC)
 
 ```
 The Solana Foundation rejected our grant application in February.
 
-We shipped anyway.
+We had a website and a whitepaper.
 
-Android SDK. iOS SDK. TypeScript SDK. Rust core. BLE mesh. WiFi Direct. NFC bootstrap. LZ4/zstd wire compression. Cross-transport proof relay. Store-and-forward. 6 instrumented Android JNI tests. 8 BLE simulator tests running in CI.
+Since then: Android SDK, iOS SDK, TypeScript SDK, Rust core, BLE mesh, WiFi Direct, Multipeer Connectivity, NFC bootstrap, LZ4 and zstd wire compression, cross-transport relay, store-and-forward, CI for all four platforms, two technical blog posts.
 
-We're applying again. The code is the application.
+Applied again last week.
 ```
 
 ---
@@ -447,343 +395,301 @@ We're applying again. The code is the application.
 
 ---
 
-### DAY 22 — Blog post drop (9am UTC)
+### DAY 22 — Blog post (9am UTC)
 
 ```
-New post: how BLE, WiFi Direct, and NFC work together under a single TransportManager.
+New post on the blog.
 
-Covers:
-— The MTU ceiling that kills back-to-back BLE notifications on certain firmware
-— Why INDICATE beats NOTIFY for fragmented delivery
-— Stale subscriber eviction via CompletableDeferred timeout
-— Deterministic WiFi Direct GO election using public keys as tie-breaker
-— NFC NDEF record structure and the iOS asymmetry
-— Cross-transport proof relay
+How BLE, WiFi Direct, and NFC work together under a single API — and every production failure we hit along the way.
 
-Written like a post-mortem, not a press release.
+The MTU ceiling that silently drops packets on certain chipsets.
+The 2-byte fragmentation header and why it's all you need.
+The WiFi Direct deadlock that happens when both devices set groupOwnerIntent 0.
+The iOS peripheral count bug.
+The NFC tap-to-pair protocol.
+
+Written from the code, not from the documentation.
 
 fernlink.vercel.app/blog/multi-transport
 ```
 
 ---
 
-### DAY 23 — WiFi Direct standalone (6pm UTC)
+### DAY 23 — WiFi Direct (6pm UTC)
 
 ```
-WiFi Direct gives you peer-to-peer TCP between Android devices with no access point. Roughly 10–40 Mbps versus BLE's 1–3 Mbps. It's the right transport once you need to move real data quickly.
+WiFi Direct forms a peer-to-peer network between Android devices with no access point. Roughly 10–40 Mbps, versus BLE's 1–3 Mbps. The right transport when you need throughput.
 
-The non-obvious part: Group Owner election.
+The Group Owner problem almost broke us.
 
-One device becomes the GO and runs the access point. The other connects to it. The framework lets you set an intent value to influence the outcome. What it doesn't document: if both devices set intent 0 simultaneously, the result is non-deterministic. Both wait for the other to start the TCP server. Neither does.
+One device becomes the GO and runs the IP layer. The other connects as client. The framework lets you express a preference — a value from 0 to 15 — but if both devices express the same preference simultaneously, the result is non-deterministic. We hit a case where both devices waited for the other to start a TCP server. Neither did.
 
-Our fix: the device with the lexicographically lower Ed25519 public key always becomes the client. Both devices know the peer's key from the DNS-SD TXT record before connecting. They agree on roles without a negotiation round-trip.
+The fix came from thinking about it differently. Both devices already have something stable, pre-agreed, and unique: their Ed25519 public keys. The device with the lexicographically lower key becomes the client. The higher key becomes the Group Owner.
 
-The same rule applies on iOS Multipeer Connectivity — lower pubkey sends the session invitation. One determinism rule, two platforms, zero deadlocks.
+Both devices learn the peer's key from the DNS-SD TXT record before connecting. They make the same decision independently. No negotiation round-trip. No race condition. Zero deadlocks since.
+
+The same rule runs on iOS with Multipeer Connectivity. One determinism principle, two platforms.
 ```
 
 ---
 
-### DAY 24 — Community ask (9am UTC)
+### DAY 24 — Integration ask (9am UTC)
 
 ```
-If you're building on Solana Mobile, shipping a POS product, or working on anything that runs transactions in low-connectivity environments: we want to talk.
+If you're building a Solana mobile app, a POS product, or anything that needs to work in low-connectivity environments:
 
-Not selling anything. Looking for real usage to test real edge cases.
+We want to talk.
 
-Full SDK access. Full support. No fees.
+Not selling anything. Looking for real integration scenarios to find the edge cases that simulated testing won't catch. Full SDK access, full engineering support, no fees.
 
 DMs open. GitHub issues work too.
 ```
 
 ---
 
-### DAY 26 — Store-and-forward ship log (6pm UTC)
+### DAY 26 — Store-and-forward (6pm UTC)
 
 ```
-Shipped: store-and-forward for offline scenarios.
+The edge case nobody thinks about until it breaks in production:
 
-When verifyTransaction() is called with no connected peers, the request queues locally in a ConcurrentLinkedQueue capped at 64 entries. The moment a peer connects and its CCC subscription is confirmed, the queue drains — every request goes to the new peer as if just submitted.
+Your user calls verifyTransaction() before any peers have connected.
 
-The peer verifies against Solana RPC, signs the proof, returns it. Consensus happens without a direct internet connection from the originating device.
+The scan is still running. The WiFi Direct group hasn't formed. There are no peers. What happens to the request?
 
-This is the pattern that makes Fernlink useful in low-connectivity markets, not just conference demos.
-```
+Old behavior: it was dropped. The client fell back to direct RPC.
 
----
+New behavior: the request queues in a ConcurrentLinkedQueue, capped at 64 entries. The moment a peer connects and its CCC subscription is confirmed, the queue drains. The peer verifies. The proof comes back. Consensus happens.
 
-### DAY 28 — Month 1 wrap (9am UTC)
+No internet required on the originating device. The peer does the RPC work.
 
-```
-Month 1.
-
-[X] GitHub stars. [Y] developers ran the demo. [Z] integration conversations started.
-
-What shipped:
-— BLE INDICATE fragmentation, cross-platform reliable
-— iOS CoreBluetooth central + peripheral
-— Android GATT server + client with foreground service
-— WiFi Direct transport, deterministic GO election
-— Multipeer Connectivity for Apple-to-Apple links
-— NFC bootstrap (Android HCE → iPhone CoreNFC)
-— Cross-transport proof relay and deduplication
-— Store-and-forward, cap 64, drains on reconnect
-— Full CI: Rust, TypeScript, Android, BLE simulator
-
-What's next: integration partners, the performance deep-dive blog post, and the start of an honest conversation about what $FERN needs to do economically.
-
-Building in public.
+This is the pattern that makes Fernlink useful in markets with intermittent connectivity, not just conference demos.
 ```
 
 ---
 
-## WEEKS 5–8 — Growth and community
-
----
-
-### MONDAY — Week preview format
+### DAY 28 — Month 1 (9am UTC)
 
 ```
-This week:
+Month 1 in public.
 
-Shipping [specific feature or fix].
-Thread on [technical topic] Wednesday.
-[Demo/benchmark/diagram] drops Friday.
+[X] GitHub stars. [Y] devs ran the demo. [Z] integration conversations.
 
-[One sentence on why the shipping item matters.]
-```
+What we shipped this month is less interesting than what we learned:
 
-**Example week 5:**
-```
-This week:
+Reliable BLE delivery requires INDICATE, not NOTIFY. The MTU your stack negotiates is not the MTU you should use. iOS peripheral count is wrong at the moment that matters. WiFi Direct needs a determinism rule or it deadlocks. NFC is a bootstrap protocol, not a transport. A 10-second fingerprint reservation cooldown is the difference between a stable BLE stack and an exhausted one.
 
-Finishing the LZ4 compression benchmarks across transport types.
-Thread on mDNS peer discovery for the TypeScript/Rust LAN transport Wednesday.
-Side-by-side proof delivery comparison — BLE vs WiFi Direct — Friday.
+None of that is in the documentation. All of it is now in the code.
 
-Compression reduces proof payload from ~200 bytes to ~140. Not dramatic. Meaningful at scale.
+Month 2: the performance post, first integrations, and the beginning of an honest public conversation about what $FERN needs to do.
 ```
 
 ---
 
-### WEDNESDAY — Technical thread topics (fully written)
+## WEEKS 5–8 — Growth
 
 ---
 
-**Thread: mDNS peer discovery on the LAN transport**
+### THREAD: mDNS and the LAN transport
 
-**Tweet 1 of 7 — Hook**
+**1/**
 ```
-How Fernlink finds peers on a local network without any central registry.
+How do two Fernlink nodes on the same WiFi network find each other without a discovery server?
 
-The TypeScript and Rust desktop transports use mDNS. Here's how it works, why it's the right call for LAN discovery, and what happens when two peers discover each other simultaneously.
+mDNS. The same mechanism your Mac uses to find printers, and AirPlay uses to find Apple TVs.
 
-Thread. 🧵
-```
-
-**Tweet 2 of 7**
-```
-mDNS (multicast DNS) is how devices on a LAN advertise services to each other without a DNS server.
-
-Your Mac finding printers on the office network: mDNS. AirPlay discovering Apple TVs: mDNS. Fernlink finding other Fernlink nodes on the same WiFi: same mechanism.
-
-It's a solved problem. We use it as-is.
+It's a solved problem. We use it as-is. Thread on what that looks like in practice. 🧵
 ```
 
-**Tweet 3 of 7**
+**2/**
 ```
 Each Fernlink LAN node advertises on _fernlink._tcp.local.
 
-The TXT record carries two fields: the node's public key (pk) and the protocol version (v). Any peer that discovers this record knows the cryptographic identity of the other node before establishing a TCP connection.
+The TXT record carries two fields: the node's Ed25519 public key and the protocol version. Any peer that discovers this record knows who it's talking to before opening a TCP connection.
 
-That's all the information needed for role negotiation.
+That's all the information needed to decide who connects and who listens.
 ```
 
-**Tweet 4 of 7**
+**3/**
 ```
 Same determinism rule as Android WiFi Direct.
 
-The node with the lexicographically lower public key connects outbound. The higher public key listens on port 8765.
+Lower public key connects outbound. Higher public key listens on port 8765.
 
-Both nodes learn each other's keys from the mDNS TXT record. Both make the same decision independently. No coin flip, no race condition.
+Both nodes learn the peer's key from the mDNS TXT record. Both make the same routing decision independently. No coin flip. No timing race.
 ```
 
-**Tweet 5 of 7**
+**4/**
 ```
-Once the TCP connection is live, the framing is minimal: 1-byte type tag + 4-byte big-endian length prefix + payload.
+Once the TCP connection is live, the framing is three fields: 1-byte type tag, 4-byte big-endian length, payload.
 
-Three type tags:
-0x01 — REQUEST
-0x02 — PROOF
-0x03 — HELLO
+Three type tags: REQUEST, PROOF, HELLO.
 
-HELLO carries the first 16 bytes of the local public key and fires immediately after connection. It's how the other side confirms who it's talking to.
+HELLO fires immediately after connect and carries the first 16 bytes of the local public key. It's how each side confirms identity before trusting anything else.
 ```
 
-**Tweet 6 of 7**
+**5/**
 ```
-The Rust desktop node runs BLE and WiFi simultaneously.
+The Rust desktop node runs BLE and TCP simultaneously.
 
-A proof arriving over BLE from an Android peer can be relayed to TypeScript nodes on the same LAN over TCP, and vice versa. The cross-transport bridge handles it. Neither side knows or cares which transport carried a given proof.
-```
+A proof arriving over BLE from an Android device is relayed to TypeScript nodes on the same LAN over TCP. A request arriving over TCP is relayed back to BLE peers. Neither side knows which transport carried a given payload.
 
-**Tweet 7 of 7**
-```
-The TypeScript LAN transport is in @fernlink/wifi:
-
-$ npm install @fernlink/wifi
-
-const manager = new TransportManager(client, rpcEndpoint)
-await manager.start()   // binds TCP server + starts mDNS
-
-Peers on the same network connect automatically. No configuration, no registry, no central coordinator.
+The cross-transport bridge is the part that makes the mesh feel like a mesh rather than a collection of point-to-point links.
 ```
 
 ---
 
-**Thread: UUID deduplication and gossip TTL**
+### THREAD: UUID deduplication and why gossip needs TTL
 
-**Tweet 1 of 6 — Hook**
+**1/**
 ```
-If you gossip a proof across a mesh without deduplication, every node receives it multiple times — once from each neighbor that already forwarded it.
+Without deduplication, gossip protocols turn into broadcast storms.
 
-Here's how Fernlink prevents that without a central coordinator.
+Node A sends a proof to B and C. B forwards to C. C forwards to B. Both forward back to A. The same 200-byte payload crosses every link in the mesh dozens of times.
 
-Thread. 🧵
-```
-
-**Tweet 2 of 6**
-```
-Each verification request carries a UUID and a TTL (time-to-live, max 8).
-
-When a node receives a request it has seen before — same UUID — it drops it immediately. No re-broadcast, no RPC call, no proof generation.
-
-The SeenCache in fernlink-core is a UUID set with TTL-based eviction. Entries expire after their validity window. The cache never grows unbounded.
+Here's how Fernlink prevents that without a central coordinator. 🧵
 ```
 
-**Tweet 3 of 6**
+**2/**
 ```
-When a node broadcasts a request, it adds the UUID to its own seen cache immediately.
+Every verification request carries a UUID.
 
-This prevents the node from processing its own echoes — which would happen if a neighbor received the request and immediately re-broadcast it back toward the originator.
-```
+When a node sees a UUID it has already processed, it drops the message immediately. No re-broadcast. No RPC call. No proof generation.
 
-**Tweet 4 of 6**
-```
-TTL controls propagation depth.
-
-Each hop decrements the TTL by 1. A node that receives a request with TTL 0 verifies it locally but does not forward it. A request with TTL 8 can cross up to 8 hops before it stops propagating.
-
-The originating device sets the TTL based on how broadly it wants the request to spread.
+The node also adds its own request UUIDs to the seen cache immediately on broadcast — so its own echoes, returned by neighbors, are dropped before they're processed twice.
 ```
 
-**Tweet 5 of 6**
+**3/**
+```
+TTL controls how far a request propagates.
+
+Each hop decrements the TTL by 1. A request with TTL 0 is verified locally but not forwarded. A request with TTL 8 can cross 8 hops before it stops.
+
+The originating device sets the TTL. Small mesh, low TTL. Large mesh or high-stakes transaction, higher TTL.
+```
+
+**4/**
 ```
 Proof deduplication works differently — by verifier identity, not by UUID.
 
-When a proof arrives, the router checks the verifier's public key against seenVerifierKeys. If that key has already contributed a proof to the current round, the new proof is verified cryptographically but not counted toward consensus.
+When a proof arrives, the router checks the verifier's public key against a seen set. If that identity has already contributed a proof to the current round, the new one is verified (the signature is checked) but not counted toward consensus.
 
-One verifier, one vote.
+One verifier. One vote. No matter how many transports it arrives on.
 ```
 
-**Tweet 6 of 6**
+**5/**
 ```
-This design means a single malicious node can't inflate the proof count by sending the same proof twice from different transports.
+This means a Sybil attack on the proof layer requires controlling independent keypairs.
 
-The proof is verified (signature check passes), recognized as a duplicate verifier, and dropped before it reaches the consensus counter.
+Replaying the same proof from the same key does nothing — the verifier-key deduplication catches it. Submitting proofs from many keys is expensive to set up and easy to rate-limit at the application layer.
 
-Cryptographic identity as deduplication key. Simple, correct, no coordination required.
+Simple deduplication, real security property.
 ```
 
 ---
 
-**Thread: Ed25519 on four platforms**
+### THREAD: Ed25519 across four runtimes
 
-**Tweet 1 of 7 — Hook**
+**1/**
 ```
-The same Ed25519 keypair and signable bytes format needs to work across Rust, Kotlin, Swift, and TypeScript.
+The same Ed25519 keypair must produce the same signature on Rust, Kotlin, Swift, and TypeScript.
 
-Here's how we keep four implementations in lockstep without a single source of truth breaking them.
+That sentence sounds obvious. Making it true in practice took longer than any other part of the protocol.
 
-Thread. 🧵
-```
-
-**Tweet 2 of 7**
-```
-Rust core uses ed25519-dalek. The canonical implementation.
-
-fernlink-core compiles to a cdylib for Android via cargo-ndk. Kotlin calls it through JNI: generateKeypair(), signProof(), verifyProof(), evaluateProofs(). The Rust logic runs natively on the device — no interpreted crypto.
+Thread on what actually goes wrong when you try to synchronize binary formats across language runtimes. 🧵
 ```
 
-**Tweet 3 of 7**
+**2/**
 ```
-iOS uses CryptoKit, Apple's native framework.
+Rust uses ed25519-dalek. This is the canonical implementation — fast, audited, widely used.
 
-CryptoKit's Curve25519.Signing gives us Ed25519 sign and verify. The signable bytes are assembled identically to the Rust implementation: same field order, same encoding, same byte widths.
-
-A proof signed by CryptoKit verifies cleanly against ed25519-dalek. We tested this explicitly.
+The Android SDK compiles fernlink-core to a native library via cargo-ndk. Kotlin calls it through JNI. The crypto never touches the JVM. The signatures are computed by the same Rust code running on the same hardware.
 ```
 
-**Tweet 4 of 7**
+**3/**
+```
+iOS uses CryptoKit's Curve25519.Signing.
+
+CryptoKit is Apple's native crypto framework. It's fast, it's correct, and it doesn't give you access to the internal state you'd need to verify against Rust's output by inspection.
+
+You verify by test: same keypair, same message, check that CryptoKit and ed25519-dalek agree on the signature. They do. We confirmed this explicitly before shipping.
+```
+
+**4/**
 ```
 TypeScript uses tweetnacl.
 
-tweetnacl.sign.detached() and tweetnacl.sign.detached.verify() map directly to the Rust sign/verify surface. Same keys, same message format, same output.
+tweetnacl.sign.detached() maps directly to ed25519-dalek's sign(). Same key format, same message, same output.
 
-The TypeScript SDK runs in Node.js, in the browser, and in the fernlink-demo CLI.
+The SDK runs in Node.js, in the browser, and in the devnet demo CLI. The same keypair works in all three environments. The BLE simulator uses it for proof generation in CI tests with no physical hardware.
 ```
 
-**Tweet 5 of 7**
+**5/**
 ```
-The signable bytes format is the hardest thing to keep synchronized.
+The trap is in the message format.
 
-tx signature (UTF-8 bytes, not base58-decoded — Solana signatures are ASCII-safe base58 strings)
-+ status byte (u8: 0 confirmed, 1 failed, 2 unknown)
-+ slot (u64 LE)
-+ blockTime (u64 LE)
-+ errorCode (u16 LE)
-+ verifier public key (32 bytes)
+The signable bytes contain a u64 slot value. In Rust: u64, little-endian, 8 bytes. In TypeScript: we write it with a DataView and have to explicitly choose endianness. In Swift: UInt64, and we use withUnsafeBytes to get the little-endian representation.
 
-Change one byte width on one platform and cross-platform verification fails silently.
+One platform uses big-endian by mistake and the signature is invalid. The signature itself gives you no information about which field is wrong. You need test vectors.
 ```
 
-**Tweet 6 of 7**
+**6/**
 ```
-We keep them synchronized with cross-platform test vectors.
+Test vectors are the only reliable synchronization mechanism for binary protocols across runtimes.
 
-A known keypair, a known transaction signature, known slot and blockTime — the same inputs produce the same Ed25519 signature on every platform. If any implementation drifts, the vector test fails immediately.
+Known keypair. Known tx signature. Known slot, blockTime, errorCode. Expected Ed25519 output.
 
-Test vectors are the only reliable way to enforce binary protocol compatibility across language runtimes.
-```
+If any implementation drifts — a field reordered, a byte width wrong, an encoding decision — the vector fails immediately. The Rust core defines the vectors. Every other runtime is tested against them.
 
-**Tweet 7 of 7**
-```
-The Rust core is the reference implementation.
-
-When something changes — a field order, a byte width, an encoding decision — the Rust tests update first. Then the cross-platform vectors update. Then every other language follows the vectors.
-
-One source of truth. Four implementations that can't silently diverge.
+This is the thing we wish we had set up before we started, not after the first cross-platform verification failure.
 ```
 
 ---
 
-### FRIDAY — Ship log / demo format
+### STANDALONE tweets for weeks 5–8
 
-**Example week 5 Friday:**
 ```
-BLE vs WiFi Direct proof delivery, same payload, same two Android devices:
+The BLE layer uses INDICATE.
+The WiFi Direct layer uses TCP.
+The Multipeer layer uses MCSession with .reliable delivery.
 
-BLE (GATT INDICATE, 182-byte fragments):
-— fragment 1: delivered + confirmed, 12ms
-— fragment 2: delivered + confirmed, 18ms
-— total: 30ms
+Three different delivery guarantees. One shared fragmentation format — two bytes, index and total — that works correctly on all three.
 
-WiFi Direct (TCP, no fragmentation needed):
-— total: 4ms
+Design once for the weakest guarantee. The stronger ones give you the same correctness for free.
+```
 
-BLE wins on power and universality. WiFi Direct wins on latency.
-TransportManager uses both. When a WiFi Direct link exists, proof delivery routes there. BLE carries the cross-platform connections.
+---
 
-[attach: benchmark diagram]
+```
+Something we didn't expect: the cross-transport relay is the most interesting part of the protocol.
+
+A request arrives from an Android device over BLE. No WiFi Direct peers.
+The BLE layer forwards it to a connected iOS peer via BLE.
+The iOS peer has a Multipeer Connectivity session to another iPhone.
+The proof comes back over MCF, relays through BLE, arrives at the Android device.
+
+Four hops. Three transports. No single device coordinated any of it.
+```
+
+---
+
+```
+The store-and-forward drain fires on every new peer connection, not just the first.
+
+If the first peer connects, fails to return a proof, and goes offline — then a second peer connects — the second drain retransmits the pending requests.
+
+This is not duplicate detection at the request level. Each verifier independently queries the RPC and signs its own result. The originating device collects whatever proofs come back.
+```
+
+---
+
+```
+"Why not just use a caching RPC?"
+
+A caching RPC is still a server you don't control.
+
+When it's down, you're down. When it's rate-limiting, you're rate-limited. When it's deciding which transactions to cache, you're trusting that decision.
+
+The mesh has no server. The peers are the infrastructure.
 ```
 
 ---
@@ -792,109 +698,113 @@ TransportManager uses both. When a WiFi Direct link exists, proof delivery route
 
 ---
 
-### Ecosystem engagement tweets (adapt to real announcements)
-
-**Wallet team angle:**
 ```
-Every time a wallet confirms a transaction, it makes an RPC call.
+Every wallet currently confirms transactions the same way: make an RPC call.
 
-In a conference room with 200 Phantom users, that's 200 identical calls to the same endpoint. One of them could verify and share the proof. The other 199 could skip the call entirely.
+It's worked fine at current scale. At the scale Solana is targeting — billions of transactions, billions of users — it becomes a structural bottleneck.
 
-That's what Fernlink adds to wallet infrastructure. Happy to walk through the integration if the @phantom team is interested.
+The mesh is infrastructure. It can sit under any wallet with a few lines of SDK integration and reduce their RPC load by 60–80% in high-density environments.
+
+If you're building a wallet on Solana, we should talk.
 ```
 
-**Solana Mobile angle:**
+---
+
 ```
-Saga and Chapter 2 are the right hardware for what Fernlink does.
+Solana Mobile is the right hardware for what Fernlink does.
 
-A dApp running on Solana Mobile has BLE, WiFi Direct, and NFC available natively. The SDK is Kotlin + JNI. The foreground service runs in the background while the app is active.
+BLE, WiFi Direct, and NFC are all native on Saga and Chapter 2. The SDK is Kotlin. The foreground service runs while the app is active.
 
-If you're building for Solana Mobile and want mesh verification baked in, we're ready to integrate.
+A dApp on Solana Mobile with Fernlink integrated gets mesh verification for free during any event, market, or gathering where multiple devices are in the same space.
 
 @SolanaMobile
 ```
 
-**RPC provider angle (not adversarial):**
+---
+
 ```
-Fernlink and RPC providers are not in competition.
+Fernlink and RPC providers solve different problems.
 
-When no mesh peers are nearby, Fernlink falls back to direct RPC — same endpoint, same call. The mesh reduces load during high-density events. The direct fallback covers everything else.
+When no mesh peers are nearby, Fernlink falls back to direct RPC — same endpoint, same call. The mesh reduces load during high-density events. The direct fallback handles everything else.
 
-Infrastructure that makes each other more resilient. That's the right model. #Solana
-```
-
-**Grant committee angle:**
-```
-We applied to the Solana Foundation grant program in early 2026. We were rejected.
-
-In the months since: Android SDK, iOS SDK, TypeScript SDK, Rust core, three transports, NFC bootstrap, wire compression, store-and-forward, CI for all four platforms.
-
-We applied again this week.
-
-@SolanaFndn — the application is the GitHub repo.
+Infrastructure that makes each other more resilient is better than infrastructure that competes.
 ```
 
 ---
 
-## WEEKS 13–16 — Pre-$FERN positioning
+```
+We will submit to the Solana Foundation grant program again.
+
+The first application had a website and a whitepaper.
+
+This application has: an Android SDK, an iOS SDK, a TypeScript SDK, a Rust core, BLE mesh, WiFi Direct, Multipeer Connectivity, NFC bootstrap, wire compression, store-and-forward, full CI, two public blog posts, and a working devnet demo anyone can run in 30 seconds.
+
+The code is the application.
+
+@SolanaFndn
+```
 
 ---
 
-### WEEK 13 — Economic layer intro (post once, mid-week)
+## WEEKS 13–16 — Pre-$FERN
+
+---
+
+### WEEK 13
 
 ```
 Verification nodes do real work.
 
-They run BLE advertisements. They scan for peers. They make RPC calls. They sign proofs with their Ed25519 keys. They relay data across the mesh.
+They advertise over BLE. They scan for peers. They make RPC calls. They sign proofs with their Ed25519 keys. They relay data across transports.
 
-Right now they do all of it for free. That means only developers running test setups do it at all.
+Right now they do all of this for free. Which means only developers running test setups do it at all.
 
-A protocol that depends on altruism doesn't scale. We're designing the economic layer now.
+The protocol can't scale on altruism. We're building the economic layer that changes that.
 ```
 
 ---
 
-### WEEK 14 — Token mechanism framing
+### WEEK 14
 
 ```
-The $FERN token is a coordination mechanism, not a reward program.
+$FERN is a coordination mechanism, not a reward program.
 
-Verifier nodes stake to participate. Accurate proofs — ones that match the Solana ledger and survive multi-proof consensus — build on-chain standing. Inaccurate or missing proofs reduce it.
+A node stakes to enter the verifier set. Accurate proofs — ones that match the ledger and pass multi-proof consensus — build on-chain standing. Inaccurate or absent proofs reduce it.
 
-Clients route verification requests to high-standing verifiers first. Low-standing nodes get fewer requests. The protocol self-selects for honest behavior without a central authority making that call.
+Clients route requests to high-standing verifiers first. Low-standing verifiers get fewer requests. The protocol selects for honest behavior without a central authority making that call.
 
-The economics follow the protocol. Not the other way around.
+You can't buy standing directly. You earn it by being right, consistently, over time.
 ```
 
 ---
 
-### WEEK 15 — Standard-setting tweet
+### WEEK 15
 
 ```
-Before we announce the token:
+We are not launching a token to fund the protocol.
 
-The protocol runs on real devices across real transports.
-The SDK has real integrations in production.
-The consensus mechanism has survived real edge cases, not just simulated ones.
-
-We are not launching a token to fund a protocol.
 We are launching a token because the protocol is ready for one.
 
 There is a difference. We take it seriously.
+
+The distinction: if the token disappeared tomorrow, the mesh would keep working. The token adds economic incentive for nodes to participate honestly at scale. The mesh itself doesn't depend on it.
 ```
 
 ---
 
-### WEEK 16 — The signal tweet
+### WEEK 16
 
 ```
 $FERN is coming.
 
-Everything about it — what it does, how it distributes, why the design is what it is — will be published in full before launch. No surprises.
+Before it launches, you will have:
+— A full public document explaining what the token does, how it distributes, and why the design is what it is
+— A contract that has been reviewed before it touches mainnet
+— A clear answer to every question about allocation, unlock schedule, and how to get it
 
-No presale. No hidden VC allocation. No whitelist that benefits insiders.
+No presale. No hidden VC round. No mystery.
 
-Follow for the announcement. The full breakdown thread drops next week.
+The announcement thread drops next week.
 ```
 
 ---
@@ -903,194 +813,172 @@ Follow for the announcement. The full breakdown thread drops next week.
 
 ---
 
-### LAUNCH THREAD
-
-**Tweet 1 of 10 — Hook**
+**Launch hook**
 ```
 $FERN is live.
 
-Here's what it is, what it does, and how to get it.
-
-Thread. 🧵
+Everything you need to know. Thread. 🧵
 ```
 
-**Tweet 2 of 10 — What Fernlink is**
+**2/**
 ```
 Fernlink is a peer-to-peer verification mesh for Solana.
 
-Devices nearby share the work of confirming transactions over BLE, WiFi, and NFC. One device hits the RPC. The signed proof reaches everyone else. 60–80% fewer RPC calls in a dense environment.
+Devices in proximity share the work of confirming transactions over BLE, WiFi, and NFC. One device queries the RPC. The signed proof propagates. Nearby devices skip the call.
 
-Apache 2.0. Android, iOS, TypeScript, Rust. Shipping since May 2026.
+60–80% fewer RPC calls in a dense environment. Open source since May 2026. Apache 2.0.
 
-Full protocol spec: fernlink.vercel.app
+Full spec: fernlink.vercel.app
 ```
 
-**Tweet 3 of 10 — What the token does**
+**3/**
 ```
 $FERN solves the verifier incentive problem.
 
-Running a Fernlink node means making RPC calls, signing proofs, staying online. Without a reason to do it, only developers bother.
+Running a Fernlink node is real work: RPC calls, proof signing, staying online.
 
-$FERN gives nodes a reason. Stake to participate. Build standing through accurate proofs. Get routed more requests. The protocol rewards reliability.
+Without an economic reason to do it, only developers bother. With $FERN, any device that runs the client and returns accurate proofs earns standing. High standing means more routing. More routing means more rewards.
+
+The economics follow the protocol. The protocol doesn't follow the economics.
 ```
 
-**Tweet 4 of 10 — Staking and standing**
+**4/**
 ```
 Standing is earned, not bought.
 
-A node that stakes $FERN enters the verifier set. Each accurate proof — one that matches the ledger and passes multi-proof consensus — accrues standing. Inaccurate proofs subtract it.
+A node stakes $FERN to enter the verifier set. Every accurate proof — confirmed by multi-proof consensus against the Solana ledger — builds standing. Inaccurate proofs reduce it.
 
-High-standing nodes get priority routing. Low-standing nodes get fewer requests and fewer rewards. There is no way to purchase standing directly.
+You cannot purchase standing directly. You accumulate it by being correct, consistently, at real scale.
 ```
 
-**Tweet 5 of 10 — Distribution**
+**5/**
 ```
-$FERN distribution:
+Distribution:
 
-[X]% — community (airdrop to early mesh participants and GitHub contributors)
-[X]% — verifier incentives (released over [Y] years as protocol rewards)
-[X]% — development fund (used for audits, infrastructure, grants)
-[X]% — team (locked [Y] years, vesting [Z] years)
+[X]% community — airdrop to early mesh participants and GitHub contributors
+[X]% verifier incentives — released over [Y] years as protocol rewards
+[X]% development fund — audits, infrastructure, ongoing grants
+[X]% team — locked [Y] years, linear vesting over [Z] years
 
-Full allocation table and unlock schedule: [link]
+Full table and unlock schedule: [link]
 ```
 
-**Tweet 6 of 10 — How to get it**
+**6/**
 ```
 How to get $FERN:
 
-[Airdrop details — specific instructions]
-[DEX listing details]
-[Where to track distribution]
+[Specific instructions — airdrop claim, DEX listing, etc.]
 
-Contract address: [address]
+Contract: [address]
 ```
 
-**Tweet 7 of 10 — What's next**
+**7/**
 ```
-The token launch is not the finish line. It's the starting gun for the economic layer.
-
-What's next:
-— Verifier reputation on-chain
-— Peer routing weighted by standing
-— Account and program state queries through the mesh
-— Offline payment channel design
-— Transaction broadcasting via mesh relay
-```
-
-**Tweet 8 of 10 — The grant story, full circle**
-```
-In February 2026 the Solana Foundation rejected our grant application.
+The Solana Foundation rejected our first grant application.
 
 We had a website and a whitepaper.
 
-Today we have an Android SDK, iOS SDK, TypeScript SDK, Rust core, three transports, NFC bootstrap, wire compression, cross-transport relay, store-and-forward, full CI, two published blog posts, and a live token.
+We built six SDKs, three transports, NFC bootstrapping, wire compression, cross-transport relay, store-and-forward, and full CI across four platforms without it.
 
-We applied again.
+$FERN is the economic layer the protocol was always going to need. It just took longer to earn the right to build it.
 ```
 
-**Tweet 9 of 10 — Security**
+**8/**
 ```
-Every proof is Ed25519 signed. Consensus requires 2+ independent verifiers by default. UUID deduplication prevents replay. No private keys cross the mesh. The Rust core is the reference implementation and is open source.
+What's next after launch:
 
-Read the whitepaper before trusting the protocol with real funds.
+Verifier reputation on-chain, fully live
+Peer routing weighted by standing
+Account and program state queries through the mesh
+Transaction broadcasting via mesh relay — submit from a device with no internet
+Offline payment channel design
+
+The token launch is not the product. The protocol is the product.
+```
+
+**9/**
+```
+Security:
+
+Every proof is Ed25519 signed. Consensus requires 2+ independent verifiers. UUID deduplication prevents replay attacks. No private keys traverse the mesh. The Rust core is the reference implementation and is fully open source.
+
+Read the whitepaper before trusting this with real funds.
 
 fernlink.vercel.app
 ```
 
-**Tweet 10 of 10 — CTA**
+**10/**
 ```
 $FERN is live.
 
 GitHub: github.com/OnoseAnthony/fernlink-network
 Website: fernlink.vercel.app
-Whitepaper: fernlink.vercel.app (link in nav)
 Telegram: t.me/Stranger3145
-
 Contract: [address]
 
-Build something. Run a node. Read the code.
+Build something. Run a node. Read the whitepaper.
 ```
 
 ---
 
-## ONGOING — Engagement replies
-
-These are templates for replying to common questions in public. Reply publicly so the answer is visible to everyone watching the thread.
-
-**"What stops a node from lying about the RPC result?"**
-```
-Nothing stops them from trying. The proof is Ed25519 signed — you can verify the signature is genuine. What the consensus layer catches is a node that returns a different result than the other verifiers. Consensus requires 2+ matching proofs by default. One bad actor can't settle a transaction alone. They can only fail to contribute.
-```
-
-**"How is this different from a caching RPC?"**
-```
-A caching RPC is still a centralized endpoint. If it goes down, every client using it goes down. Fernlink distributes the verification work to the devices already in the field. There's no single server to target. The mesh is the redundancy.
-```
-
-**"Why not just run more RPC nodes?"**
-```
-More RPC nodes help with capacity. They don't help with latency for nearby devices, with offline scenarios, or with the cost structure for high-volume mobile apps. The mesh addresses a different layer of the problem. The two are complementary.
-```
-
-**"Is the BLE range enough for real deployments?"**
-```
-BLE range is 10–100m depending on environment. For dense scenarios — markets, events, transit hubs — that's plenty. For wider geographic spread, the gossip layer relays proofs across multiple hops. A proof verified by one device can reach another 3–4 hops away without either device making a direct connection.
-```
-
----
-
-## QUICK STANDALONE TWEETS (use when nothing specific is shipping)
+## ALWAYS-ON — Standalone tweets for quiet days
 
 ```
-A Solana dApp that works offline is not a compromise.
-It's what financial infrastructure looks like outside of reliable internet coverage.
+The thing about running four transports simultaneously:
+
+BLE finds a peer in 3 seconds. WiFi Direct finds the same peer in 6. NFC skips both and connects in 200ms via tap.
+
+TransportManager doesn't pick one. All three run. The first confirmed connection wins. The others quietly keep looking.
 ```
 
 ---
 
 ```
-The BLE layer and the WiFi Direct layer and the NFC layer are all active simultaneously.
-TransportManager routes each proof to the fastest available path.
-The app never has to pick.
+The Rust core has no async runtime.
+
+The rpc feature — which pulls in reqwest — is disabled for the Android FFI build. No OpenSSL, no Tokio, no SSL handshake. The JNI exports are synchronous: generateKeypair, signProof, verifyProof, evaluateProofs.
+
+The Kotlin layer handles all async. The Rust layer handles all crypto. Clean separation, no FFI complexity leaking upward.
 ```
 
 ---
 
 ```
-We run in CI without physical hardware.
+A proof that arrives over WiFi Direct and a proof that arrives over BLE are deduplicated by verifier public key.
 
-FernlinkSimulator spins up N in-process BLE peers, routes requests through the mesh, and verifies that consensus is reached — all in Vitest, no Bluetooth radio required.
+The second one is verified — the Ed25519 signature check runs — but not counted toward consensus if the key has already contributed to the current round.
 
-8 tests. All passing.
+One verifier, one vote, regardless of how many paths that vote traveled to reach you.
 ```
 
 ---
 
 ```
-The whitepaper is not marketing.
+The whitepaper was written before the first line of code shipped.
 
-It's 40+ pages of protocol design, security model, transport layer specs, and consensus rules. Written before a single line of code shipped. Every implementation decision traces back to it.
+Not because that's good practice — though it is — but because building a cross-platform binary protocol without a spec is how you end up with four implementations that mostly agree.
 
-fernlink.vercel.app
+Mostly is not acceptable for a cryptographic protocol.
 ```
 
 ---
 
 ```
-"How do you prevent the mesh from being used to propagate false confirmations?"
+We run BLE hardware tests in CI with no BLE hardware.
 
-Multi-proof consensus. Ed25519 signatures. UUID dedup with TTL.
+FernlinkSimulator creates N in-process peer instances, routes requests through the mesh, and verifies that consensus is reached — all in Vitest.
 
-And: the Solana ledger is the ground truth. A peer can't forge a confirmation for a transaction that didn't happen — the signature check catches it immediately.
+8 tests. Zero radios. Every PR.
+
+Shipping without a hardware simulator means shipping without a safety net.
 ```
 
 ---
 
 ```
-Store-and-forward means offline is not a failure mode.
+The 2-byte fragmentation header — [index, total] — is the same across Kotlin, Swift, TypeScript, and Rust.
 
-If no peers are in range when you call verifyTransaction(), the request queues locally. The moment a peer appears — BLE, WiFi, NFC — the queue drains. Proofs come back. Consensus happens.
+We didn't design a complex framing layer and then simplify it. We started with the minimum and added nothing.
 
-No dropped verifications. No silent failures.
+When you have INDICATE guaranteeing delivery and a reassembler handling ordering, two bytes is genuinely all you need.
 ```
